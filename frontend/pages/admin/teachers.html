@@ -156,7 +156,10 @@
                     <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">Manage <span id="teacherCount">0</span> active educators across various departments.</p>
                 </div>
                 <div class="flex items-center gap-3">
-                 ,
+                 <button id="downloadBtn" class="p-2.5 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-white dark:hover:bg-slate-800 transition-all text-slate-600 dark:text-slate-400">
+    <i data-lucide="download" class="w-5 h-5"></i>
+</button>
+
                     <button id="btnAddTeacher" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg shadow-lg shadow-blue-200 dark:shadow-none flex items-center justify-center space-x-2 transition-all active:scale-95">
                         <i data-lucide="user-plus" class="w-4 h-4"></i>
                         <span class="font-semibold text-sm">Add New Teacher</span>
@@ -518,6 +521,32 @@ elementsConfirm.confirmDelete.addEventListener('click', () => {
         updateThemeIcons();
         if (window.lucide) window.lucide.createIcons();
     });
+
+    // CSV Export
+document.getElementById('downloadBtn').addEventListener('click', () => {
+    if (teachers.length === 0) {
+        alert('No teachers to download!');
+        return;
+    }
+
+    // CSV Header
+    let csv = 'Name,ID,Department,Email,Phone,Status,Joined\n';
+
+    // Loop through teachers and append data
+    teachers.forEach(t => {
+        csv += `"${t.name}","${t.id}","${t.dept}","${t.email}","${t.phone}","${t.status}","${t.joined}"\n`;
+    });
+
+    // Create Blob and download link
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'teachers_list.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+});
+
 </script>
 <script src="../../js/app.js"></script>
 </body>
