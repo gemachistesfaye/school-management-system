@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | EduStream School Management</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Tailwind Configuration for Dark Mode
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            200: '#bfdbfe',
+                            300: '#93c5fd',
+                            400: '#60a5fa',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom transitions for a smoother dark mode toggle */
+        body {
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        .login-card {
+            transition: transform 0.2s ease, box-shadow 0.3s ease;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-900 min-h-screen flex items-center justify-center p-4">
+
+    <!-- Dark Mode Toggle Button -->
+    <div class="fixed top-6 right-6">
+        <button id="theme-toggle" class="p-3 rounded-full bg-white dark:bg-slate-800 shadow-lg border border-slate-200 dark:border-slate-700 hover:scale-110 transition-transform focus:outline-none">
+            <!-- Moon Icon (Visible in Light Mode) -->
+            <svg id="theme-toggle-dark-icon" class="hidden w-6 h-6 text-slate-700" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+            <!-- Sun Icon (Visible in Dark Mode) -->
+            <svg id="theme-toggle-light-icon" class="hidden w-6 h-6 text-yellow-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+        </button>
+    </div>
+
+    <!-- Login Container -->
+    <div class="w-full max-w-md">
+        <!-- Logo/Header Area -->
+        <div class="text-center mb-8">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary-600 text-white shadow-xl shadow-primary-200 dark:shadow-none mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path d="M12 14l9-5-9-5-9 5 9 5z" />
+                    <path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222" />
+                </svg>
+            </div>
+            <h1 class="text-2xl font-bold text-slate-800 dark:text-white">EduStream MS</h1>
+            <p class="text-slate-500 dark:text-slate-400">Welcome back, please login to your account</p>
+        </div>
+
+        <!-- Login Card -->
+        <div class="login-card bg-white dark:bg-slate-800 p-8 rounded-3xl shadow-2xl shadow-slate-200 dark:shadow-none border border-slate-100 dark:border-slate-700">
+            <!-- Alert Message (Hidden by default) -->
+            <div id="alert-box" class="hidden mb-6 p-4 rounded-xl text-sm border"></div>
+
+            <form id="login-form" class="space-y-6">
+                <!-- Email Field -->
+                <div>
+                    <label for="email" class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Email Address</label>
+                    <input type="email" id="email" 
+                        class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all placeholder:text-slate-400"
+                        placeholder="admin@school.com">
+                </div>
+
+                <!-- Password Field -->
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <label for="password" class="text-sm font-semibold text-slate-700 dark:text-slate-300">Password</label>
+                        <a href="#" class="text-xs text-primary-600 hover:text-primary-700 font-medium">Forgot password?</a>
+                    </div>
+                    <input type="password" id="password" 
+                        class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all placeholder:text-slate-400"
+                        placeholder="••••••••">
+                </div>
+
+                <!-- Remember Me -->
+                <div class="flex items-center">
+                    <input type="checkbox" id="remember" class="w-4 h-4 text-primary-600 bg-slate-100 border-slate-300 rounded focus:ring-primary-500">
+                    <label for="remember" class="ml-2 text-sm text-slate-600 dark:text-slate-400">Remember this device</label>
+                </div>
+
+                <!-- Login Button -->
+                <button type="submit" 
+                    class="w-full py-3 px-4 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-xl shadow-lg shadow-primary-200 dark:shadow-none transform transition active:scale-[0.98] focus:outline-none focus:ring-4 focus:ring-primary-500/50">
+                    Sign In
+                </button>
+            </form>
+
+            <!-- Footer Links -->
+            <div class="mt-8 text-center text-sm text-slate-500 dark:text-slate-400">
+                Don't have an account? <a href="#" class="text-primary-600 hover:underline font-semibold">Contact Administrator</a>
+            </div>
+        </div>
+        
+        <!-- Environment Indicator -->
+        <p class="text-center mt-8 text-xs text-slate-400 uppercase tracking-widest">Safe & Secure Portal</p>
+    </div>
+
+    <script>
+        // --- Dark Mode Logic ---
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        const themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
+        const themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
+
+        // Check for saved theme preference or system preference
+        function initTheme() {
+            if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+                themeToggleLightIcon.classList.remove('hidden');
+            } else {
+                document.documentElement.classList.remove('dark');
+                themeToggleDarkIcon.classList.remove('hidden');
+            }
+        }
+
+        // Toggle theme and update localStorage
+        themeToggleBtn.addEventListener('click', function() {
+            themeToggleDarkIcon.classList.toggle('hidden');
+            themeToggleLightIcon.classList.toggle('hidden');
+
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('color-theme', 'light');
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('color-theme', 'dark');
+            }
+        });
+
+        // --- Form Logic ---
+        const loginForm = document.getElementById('login-form');
+        const alertBox = document.getElementById('alert-box');
+
+        function showAlert(message, type = 'error') {
+            alertBox.textContent = message;
+            alertBox.classList.remove('hidden', 'bg-red-50', 'text-red-700', 'border-red-200', 'bg-green-50', 'text-green-700', 'border-green-200');
+            
+            if (type === 'error') {
+                alertBox.classList.add('bg-red-50', 'text-red-700', 'border-red-200', 'dark:bg-red-900/30', 'dark:text-red-400', 'dark:border-red-800/50');
+            } else {
+                alertBox.classList.add('bg-green-50', 'text-green-700', 'border-green-200', 'dark:bg-green-900/30', 'dark:text-green-400', 'dark:border-green-800/50');
+            }
+        }
+
+        loginForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value.trim();
+
+            // Simple validation
+            if (!email || !password) {
+                showAlert('Please enter both email and password.');
+                return;
+            }
+
+            // Mock success
+            showAlert('Login successful! Redirecting...', 'success');
+            
+            // Simulation of redirect
+            setTimeout(() => {
+                window.location.href = 'dashboard.html';
+            }, 1000);
+        });
+
+        // Initialize theme on load
+        initTheme();
+    </script>
+</body>
+</html>

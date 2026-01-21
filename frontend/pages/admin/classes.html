@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Classes Management | School Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script>
+        // Configure Tailwind to use 'dark' class - required for app.js integration
+        tailwind.config = {
+            darkMode: 'class'
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        :root {
+            --primary-blue: #3b82f6;
+            --dark-bg: #0f172a;
+            --dark-card: #1e293b;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Smooth Sidebar transitions */
+        .sidebar-transition {
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: #475569;
+        }
+
+        .modal-overlay {
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+        }
+
+        /* Specific overrides for components that need precise dark coloring */
+        .dark .modal-content {
+            background-color: var(--dark-card);
+            border: 1px solid #334155;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 dark:bg-slate-900 dark:text-gray-100 min-h-screen">
+
+    <div class="flex min-h-screen overflow-hidden">
+        <!-- Sidebar Backdrop for Mobile -->
+       
+
+        <!-- Sidebar -->
+        <aside id="sidebar" class="fixed inset-y-0 left-0 w-64 bg-white dark:bg-slate-800 border-r border-gray-200 dark:border-slate-700 z-50 transform -translate-x-full md:translate-x-0 md:static md:block sidebar-transition shadow-xl md:shadow-none">
+ <div class="p-6 flex items-center justify-between">
+    <!-- Left: Icon + Name -->
+    <div class="flex items-center gap-3">
+        <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-sm">S</div>
+        <span class="text-xl font-bold tracking-tight dark:text-white">EduSmart</span>
+    </div>
+
+    <!-- Right: Theme Toggle -->
+    <button id="theme-toggle" class="flex items-center justify-center p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition">
+        <i id="theme-toggle-dark-icon" data-lucide="moon" class="w-5 h-5"></i>
+        <i id="theme-toggle-light-icon" data-lucide="sun" class="w-5 h-5 hidden"></i>
+    </button>
+</div>
+
+            <nav class="mt-4 px-4 space-y-2">
+                <a href="./dashboard.html" class="flex items-center gap-3 p-3 text-gray-600 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-slate-700/50 hover:text-blue-600 rounded-xl transition-all">
+                    <i class="fas fa-th-large w-5"></i> Dashboard
+                </a>
+                <a href="./classes.html" class="flex items-center gap-3 p-3 bg-blue-600 text-white rounded-xl shadow-lg shadow-blue-200 dark:shadow-none">
+                    <i class="fas fa-chalkboard w-5"></i> Classes
+                </a>
+                <a href="./students.html" class="flex items-center gap-3 p-3 text-gray-600 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-slate-700/50 hover:text-blue-600 rounded-xl transition-all">
+                    <i class="fas fa-user-graduate w-5"></i> Students
+                </a>
+                <a href="./teachers.html" class="flex items-center gap-3 p-3 text-gray-600 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-slate-700/50 hover:text-blue-600 rounded-xl transition-all">
+                    <i class="fas fa-chalkboard-teacher w-5"></i> Teachers
+                </a>
+                <div class="pt-4 pb-2 border-t border-gray-100 dark:border-slate-700 mt-4">
+                    <p class="text-xs font-semibold text-gray-400 uppercase px-3">System</p>
+                </div>
+                <a href="./settings.html" class="flex items-center gap-3 p-3 text-gray-600 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-slate-700/50 hover:text-blue-600 rounded-xl transition-all">
+                    <i class="fas fa-cog w-5"></i> Settings
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
+            <!-- Navbar -->
+            <header class="h-16 bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 flex items-center justify-between px-4 md:px-8 shrink-0 z-30 shadow-sm transition-colors duration-300">
+                <div class="flex items-center gap-4">
+                    <button id="mobile-menu-btn" class="md:hidden text-gray-600 dark:text-gray-300 p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                    <h2 class="text-lg font-semibold dark:text-white truncate">Classes Management</h2>
+                </div>
+
+                <div class="flex items-center gap-4">
+         
+                    
+                    <div class="h-8 w-px bg-gray-200 dark:bg-slate-700 mx-1"></div>
+                    
+                    <div class="flex items-center gap-3">
+                        <div class="text-right hidden sm:block">
+                            <p class="text-sm font-medium dark:text-white leading-none">Admin User</p>
+                            <p class="text-xs text-gray-500 mt-1">Super Admin</p>
+                        </div>
+                        <img src="https://ui-avatars.com/api/?name=Admin+User&background=3b82f6&color=fff" alt="Avatar" class="w-10 h-10 rounded-full border-2 border-white dark:border-slate-600 shadow-sm">
+                    </div>
+                </div>
+            </header>
+
+            <!-- Page Content -->
+            <div class="flex-1 overflow-y-auto p-4 md:p-8 bg-gray-50 dark:bg-slate-900 transition-colors duration-300">
+                <div class="max-w-6xl mx-auto">
+                    
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+                        <div>
+                            <h1 class="text-2xl font-bold dark:text-white">School Classes</h1>
+                            <p class="text-gray-500 dark:text-gray-400">Manage, organize, and track academic classes.</p>
+                        </div>
+                        <button onclick="openModal()" class="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl transition-all shadow-lg shadow-blue-200/50 dark:shadow-none font-medium whitespace-nowrap">
+                            <i class="fas fa-plus"></i>
+                            Add New Class
+                        </button>
+                    </div>
+
+                    <!-- Filter and Search -->
+                    <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 mb-6 flex flex-col sm:flex-row gap-4">
+                        <div class="relative flex-1">
+                            <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                            <input type="text" id="searchInput" placeholder="Search by class name or teacher..." 
+                                class="w-full pl-11 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-600 dark:bg-slate-700 dark:text-white focus:ring-2 focus:ring-blue-500 bg-gray-50 dark:placeholder-gray-400 outline-none transition-all">
+                        </div>
+                        <select id="statusFilter" class="px-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 dark:border-slate-600 dark:bg-slate-700 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+                            <option value="all">All Status</option>
+                            <option value="Active">Active</option>
+                            <option value="Inactive">Inactive</option>
+                        </select>
+                    </div>
+
+                    <!-- Table Container -->
+                    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden transition-colors duration-300">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-gray-50 dark:bg-slate-700/50 text-gray-500 dark:text-gray-400 uppercase text-xs font-bold tracking-wider">
+                                        <th class="px-6 py-5">Class ID</th>
+                                        <th class="px-6 py-5">Class Name</th>
+                                        <th class="px-6 py-5">Teacher</th>
+                                        <th class="px-6 py-5">Students</th>
+                                        <th class="px-6 py-5">Status</th>
+                                        <th class="px-6 py-5 text-center">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="classesTableBody" class="divide-y divide-gray-100 dark:divide-slate-700">
+                                    <!-- Dynamic Data -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <div id="noResults" class="hidden p-16 text-center">
+                            <div class="text-gray-300 dark:text-slate-600 mb-4"><i class="fas fa-search-minus text-6xl"></i></div>
+                            <p class="text-gray-500 dark:text-gray-400 text-lg">No classes found matching your search.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal Form -->
+    <div id="classModal" class="fixed inset-0 z-[60] hidden flex items-center justify-center p-4">
+        <div class="modal-overlay absolute inset-0" onclick="closeModal()"></div>
+        <div class="modal-content bg-white dark:bg-slate-800 w-full max-w-md rounded-2xl shadow-2xl relative z-10 overflow-hidden transform transition-all scale-95 opacity-0 duration-300" id="modalContent">
+            <div class="p-6 border-b border-gray-100 dark:border-slate-700 flex justify-between items-center bg-gray-50/50 dark:bg-slate-800">
+                <h3 id="modalTitle" class="text-xl font-bold dark:text-white">Add New Class</h3>
+                <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-white p-2">
+                    <i class="fas fa-times text-lg"></i>
+                </button>
+            </div>
+            <form id="classForm" class="p-6 space-y-4">
+                <input type="hidden" id="editIndex">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Class ID</label>
+                    <input type="text" id="classId" required placeholder="e.g. GRADE-10A" 
+                        class="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 dark:bg-slate-700 dark:border-slate-600 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Class Name</label>
+                    <input type="text" id="className" required placeholder="e.g. Mathematics Advanced" 
+                        class="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 dark:bg-slate-700 dark:border-slate-600 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Assign Teacher</label>
+                    <select id="teacherName" required class="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 dark:bg-slate-700 dark:border-slate-600 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none">
+                        <option value="">Select a teacher</option>
+                        <option value="Dr. Robert Wilson">Dr. Robert Wilson</option>
+                        <option value="Prof. Sarah Jenkins">Prof. Sarah Jenkins</option>
+                        <option value="Mr. James Bond">Mr. James Bond</option>
+                        <option value="Ms. Maria Garcia">Ms. Maria Garcia</option>
+                    </select>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Student Count</label>
+                        <input type="number" id="studentCount" required min="0" value="0"
+                            class="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 dark:bg-slate-700 dark:border-slate-600 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
+                        <select id="status" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 dark:bg-slate-700 dark:border-slate-600 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none">
+                            <option value="Active">Active</option>
+                            <option value="Inactive">Inactive</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="pt-4 flex gap-3">
+                    <button type="button" onclick="closeModal()" class="flex-1 px-4 py-3 rounded-xl border border-gray-200 dark:border-slate-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 transition-all font-medium">Cancel</button>
+                    <button type="submit" class="flex-1 px-4 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-lg shadow-blue-200/40 dark:shadow-none transition-all">Save Class</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation -->
+    <div id="deleteModal" class="fixed inset-0 z-[60] hidden flex items-center justify-center p-4">
+        <div class="modal-overlay absolute inset-0" onclick="closeDeleteModal()"></div>
+        <div class="bg-white dark:bg-slate-800 w-full max-sm rounded-2xl shadow-2xl relative z-10 p-8 text-center border dark:border-slate-700">
+            <div class="w-20 h-20 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-full flex items-center justify-center mx-auto mb-6">
+                <i class="fas fa-trash-alt text-3xl"></i>
+            </div>
+            <h3 class="text-2xl font-bold dark:text-white mb-3">Delete Class?</h3>
+            <p class="text-gray-500 dark:text-gray-400 mb-8 leading-relaxed">This will permanently remove the class from your records. This action cannot be undone.</p>
+            <div class="flex gap-4">
+                <button onclick="closeDeleteModal()" class="flex-1 px-4 py-3 rounded-xl border border-gray-200 dark:border-slate-600 dark:text-gray-300 font-medium hover:bg-gray-50 dark:hover:bg-slate-700">Cancel</button>
+                <button id="confirmDeleteBtn" class="flex-1 px-4 py-3 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold shadow-lg shadow-red-200/40 dark:shadow-none transition-all">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data Management
+        const initialClasses = [
+            { id: "MAT-101", name: "Intro to Algebra", teacher: "Dr. Robert Wilson", students: 28, status: "Active" },
+            { id: "PHY-202", name: "Quantum Physics", teacher: "Prof. Sarah Jenkins", students: 15, status: "Active" },
+            { id: "HIS-105", name: "World History", teacher: "Mr. James Bond", students: 32, status: "Active" },
+            { id: "CHE-301", name: "Organic Chemistry", teacher: "Ms. Maria Garcia", students: 12, status: "Inactive" },
+            { id: "ENG-102", name: "Literature & Arts", teacher: "Dr. Robert Wilson", students: 25, status: "Active" }
+        ];
+
+        let classes = [];
+        try {
+            const stored = localStorage.getItem('schoolClasses');
+            classes = stored ? JSON.parse(stored) : initialClasses;
+            if (!Array.isArray(classes)) classes = initialClasses;
+        } catch (e) {
+            classes = initialClasses;
+        }
+        
+        let deleteTargetIndex = null;
+
+        // Theme Toggle Visual Handler (app.js handles actual state)
+        const themeToggle = document.getElementById('theme-toggle');
+        const themeIcon = document.getElementById('theme-icon');
+        
+        // This function syncs the icon based on the document class (which app.js controls)
+        function updateThemeIcon() {
+            const isDark = document.documentElement.classList.contains('dark');
+            if (isDark) {
+                themeIcon.classList.replace('fa-moon', 'fa-sun');
+            } else {
+                themeIcon.classList.replace('fa-sun', 'fa-moon');
+            }
+        }
+
+        // Listener for icon syncing when app.js changes classes
+        const observer = new MutationObserver(updateThemeIcon);
+        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+
+        // Sidebar Controls
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const closeSidebarBtn = document.getElementById('close-sidebar');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebar-overlay');
+
+        function toggleSidebar() {
+            sidebar.classList.toggle('-translate-x-full');
+            sidebarOverlay.classList.toggle('hidden');
+        }
+
+        mobileMenuBtn?.addEventListener('click', toggleSidebar);
+        closeSidebarBtn?.addEventListener('click', toggleSidebar);
+        sidebarOverlay?.addEventListener('click', toggleSidebar);
+
+        // Core Rendering
+        function renderClasses(data = classes) {
+            const tbody = document.getElementById('classesTableBody');
+            const noResults = document.getElementById('noResults');
+            const safeData = Array.isArray(data) ? data : [];
+            
+            tbody.innerHTML = '';
+
+            if (safeData.length === 0) {
+                noResults.classList.remove('hidden');
+            } else {
+                noResults.classList.add('hidden');
+                safeData.forEach((cls) => {
+                    const originalIndex = classes.findIndex(c => c.id === cls.id);
+                    const statusColor = cls.status === 'Active' 
+                        ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300' 
+                        : 'bg-gray-100 text-gray-700 dark:bg-slate-700 dark:text-gray-400';
+                    
+                    const row = `
+                        <tr class="hover:bg-gray-50/50 dark:hover:bg-slate-700/30 transition-colors">
+                            <td class="px-6 py-4 font-mono text-sm font-semibold text-blue-600 dark:text-blue-400">${cls.id}</td>
+                            <td class="px-6 py-4 dark:text-slate-200 font-medium">${cls.name}</td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-3 text-gray-600 dark:text-gray-300">
+                                    <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(cls.teacher)}&background=3b82f6&color=fff&size=32" class="w-8 h-8 rounded-full border border-gray-100 dark:border-slate-600">
+                                    <span class="text-sm">${cls.teacher}</span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-gray-600 dark:text-gray-400 font-medium">${cls.students}</td>
+                            <td class="px-6 py-4">
+                                <span class="px-3 py-1 rounded-full text-xs font-bold ${statusColor}">${cls.status}</span>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <div class="flex items-center justify-center gap-1">
+                                    <button onclick="editClass(${originalIndex})" class="p-2.5 text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900/20 rounded-xl transition-all" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button onclick="confirmDelete(${originalIndex})" class="p-2.5 text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20 rounded-xl transition-all" title="Delete">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                    tbody.insertAdjacentHTML('beforeend', row);
+                });
+            }
+            localStorage.setItem('schoolClasses', JSON.stringify(classes));
+        }
+
+        // Modal Logic
+        const modal = document.getElementById('classModal');
+        const modalContent = document.getElementById('modalContent');
+
+        function openModal(editIdx = null) {
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            setTimeout(() => {
+                modalContent.classList.remove('scale-95', 'opacity-0');
+                modalContent.classList.add('scale-100', 'opacity-100');
+            }, 10);
+
+            if (editIdx !== null && editIdx >= 0) {
+                const cls = classes[editIdx];
+                document.getElementById('modalTitle').innerText = 'Edit Class';
+                document.getElementById('editIndex').value = editIdx;
+                document.getElementById('classId').value = cls.id;
+                document.getElementById('className').value = cls.name;
+                document.getElementById('teacherName').value = cls.teacher;
+                document.getElementById('studentCount').value = cls.students;
+                document.getElementById('status').value = cls.status;
+            } else {
+                document.getElementById('modalTitle').innerText = 'Add New Class';
+                document.getElementById('classForm').reset();
+                document.getElementById('editIndex').value = '';
+            }
+        }
+
+        function closeModal() {
+            modalContent.classList.replace('scale-100', 'opacity-100', 'scale-95');
+            modalContent.classList.add('opacity-0');
+            document.body.style.overflow = '';
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+
+        document.getElementById('classForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const editIdx = document.getElementById('editIndex').value;
+            const classData = {
+                id: document.getElementById('classId').value.trim(),
+                name: document.getElementById('className').value.trim(),
+                teacher: document.getElementById('teacherName').value,
+                students: parseInt(document.getElementById('studentCount').value) || 0,
+                status: document.getElementById('status').value
+            };
+
+            if (editIdx !== '' && editIdx !== null) {
+                classes[parseInt(editIdx)] = classData;
+            } else {
+                classes.unshift(classData);
+            }
+
+            renderClasses();
+            closeModal();
+        });
+
+        // Delete Handler
+        function confirmDelete(index) {
+            deleteTargetIndex = index;
+            document.getElementById('deleteModal').classList.remove('hidden');
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').classList.add('hidden');
+            deleteTargetIndex = null;
+        }
+
+        document.getElementById('confirmDeleteBtn').addEventListener('click', () => {
+            if (deleteTargetIndex !== null) {
+                classes.splice(deleteTargetIndex, 1);
+                renderClasses();
+                closeDeleteModal();
+            }
+        });
+
+        window.editClass = openModal;
+
+        // Search/Filter
+        const searchInput = document.getElementById('searchInput');
+        const statusFilter = document.getElementById('statusFilter');
+
+        function applyFilters() {
+            const searchTerm = (searchInput.value || '').toLowerCase();
+            const statusTerm = statusFilter.value;
+
+            const filtered = classes.filter(cls => {
+                const matchesSearch = (cls.name || '').toLowerCase().includes(searchTerm) || 
+                                     (cls.teacher || '').toLowerCase().includes(searchTerm) ||
+                                     (cls.id || '').toLowerCase().includes(searchTerm);
+                const matchesStatus = statusTerm === 'all' || cls.status === statusTerm;
+                return matchesSearch && matchesStatus;
+            });
+            renderClasses(filtered);
+        }
+
+        searchInput.addEventListener('input', applyFilters);
+        statusFilter.addEventListener('change', applyFilters);
+
+        // Initial Load
+        window.onload = () => {
+            renderClasses();
+            updateThemeIcon(); // Sync icon with initial state
+        };
+    </script>
+
+    <!-- External app.js logic (Last to override or initialize state) -->
+    <script src="../../js/app.js"></script>
+</body>
+</html>

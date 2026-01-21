@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher | Students Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Configure Tailwind to use the 'class' strategy for dark mode
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        darkBg: '#111827',
+                        darkCard: '#1f2937',
+                    }
+                }
+            }
+        }
+
+        // Apply theme immediately to prevent flashing
+        function initTheme() {
+            const savedTheme = localStorage.getItem('darkMode');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            
+            if (savedTheme === 'true' || (savedTheme === null && prefersDark)) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        }
+        initTheme();
+    </script>
+    <style>
+        /* Force color variables if classes fail */
+        :root {
+            --bg-main: #f9fafb;
+            --bg-card: #ffffff;
+            --text-main: #111827;
+            --border-color: #e5e7eb;
+        }
+
+        .dark {
+            --bg-main: #111827;
+            --bg-card: #1f2937;
+            --text-main: #f9fafb;
+            --border-color: #374151;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            transition: background-color 0.2s ease, border-color 0.2s ease;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #3b82f6; border-radius: 10px; }
+
+        /* Sidebar active state */
+        .sidebar-link.active {
+            background-color: rgba(59, 130, 246, 0.1);
+            border-right: 4px solid #3b82f6;
+            color: #3b82f6;
+        }
+    </style>
+</head>
+<body class="font-sans antialiased">
+
+    <!-- Mobile Sidebar Backdrop -->
+    <div id="sidebarBackdrop" class="fixed inset-0 bg-black/50 z-40 hidden lg:hidden"></div>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="fixed top-0 left-0 h-full w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 z-50 transition-transform -translate-x-full lg:translate-x-0 overflow-y-auto">
+        <div class="p-6">
+            <h1 class="text-2xl font-bold text-blue-600 dark:text-blue-400">EduStream</h1>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 uppercase tracking-wider font-semibold">Teacher Portal</p>
+        </div>
+
+        <nav class="mt-4 px-4 space-y-2">
+            <a href="./dashboard.html" class="sidebar-link flex items-center p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors group">
+                <svg class="w-5 h-5 mr-3 text-gray-500 group-hover:text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                Dashboard
+            </a>
+            <a href="./students.html" class="sidebar-link active flex items-center p-3 rounded-lg transition-colors group">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                Students
+            </a>
+            <a href="./attendance.html" class="sidebar-link flex items-center p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors group">
+                <svg class="w-5 h-5 mr-3 text-gray-500 group-hover:text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+                Attendance
+            </a>
+            <div class="pt-4 pb-2 border-t border-gray-200 dark:border-gray-700 mt-4">
+                <a href="./settings.html" class="sidebar-link flex items-center p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors group">
+                    <svg class="w-5 h-5 mr-3 text-gray-500 group-hover:text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37a1.724 1.724 0 002.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    Settings
+                </a>
+            </div>
+        </nav>
+    </aside>
+
+    <!-- Header -->
+    <header class="fixed top-0 right-0 left-0 lg:left-64 h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-6 z-30">
+        <div class="flex items-center">
+            <button id="sidebarToggle" class="lg:hidden p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 mr-2 text-gray-600 dark:text-gray-300">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+            </button>
+            <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-100 hidden md:block">Students Management</h2>
+        </div>
+
+        <div class="flex items-center space-x-4">
+            <!-- Theme Toggle -->
+            <button id="themeToggle" class="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:ring-2 hover:ring-blue-400 transition-all">
+                <svg id="themeIconSun" class="w-5 h-5 hidden dark:block" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" /></svg>
+                <svg id="themeIconMoon" class="w-5 h-5 block dark:hidden" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+            </button>
+
+            <!-- Profile -->
+            <div class="flex items-center space-x-3 border-l pl-4 border-gray-200 dark:border-gray-700">
+                <div class="text-right hidden sm:block">
+                    <p class="text-sm font-medium text-gray-800 dark:text-gray-100">Prof. Robert Smith</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Senior Educator</p>
+                </div>
+                <img src="https://ui-avatars.com/api/?name=Robert+Smith&background=3b82f6&color=fff" alt="Profile" class="w-9 h-9 rounded-full border border-gray-200 dark:border-gray-600">
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="lg:ml-64 pt-24 pb-12 px-6">
+        <div class="mb-8">
+            <h3 class="text-2xl font-bold text-gray-900 dark:text-white">My Students</h3>
+            <p class="text-gray-600 dark:text-gray-400">Class roster and student data overview.</p>
+        </div>
+
+        <!-- Filters Container -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div class="relative">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                </span>
+                <input type="text" id="searchInput" placeholder="Search students..." class="w-full pl-10 pr-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-gray-100 outline-none transition-all">
+            </div>
+            
+            <select id="classFilter" class="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-gray-100 outline-none">
+                <option value="">All Classes</option>
+                <option value="10-A">10-A</option>
+                <option value="10-B">10-B</option>
+                <option value="11-C">11-C</option>
+            </select>
+
+            <select id="genderFilter" class="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-gray-100 outline-none">
+                <option value="">All Genders</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+            </select>
+        </div>
+
+        <!-- Content Card -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead>
+                        <tr class="bg-gray-50 dark:bg-gray-900/50 text-gray-500 dark:text-gray-400 uppercase text-xs font-bold tracking-widest border-b border-gray-200 dark:border-gray-700">
+                            <th class="px-6 py-4">ID</th>
+                            <th class="px-6 py-4">Name</th>
+                            <th class="px-6 py-4">Class</th>
+                            <th class="px-6 py-4">Gender</th>
+                            <th class="px-6 py-4">DOB</th>
+                        </tr>
+                    </thead>
+                    <tbody id="studentTableBody" class="divide-y divide-gray-100 dark:divide-gray-700 text-gray-700 dark:text-gray-300">
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+            <div id="noDataMessage" class="hidden p-10 text-center text-gray-400">
+                <p>No matching records found.</p>
+            </div>
+        </div>
+        
+        <div class="mt-4 text-sm text-gray-500 dark:text-gray-400" id="tableStats"></div>
+    </main>
+
+    <script>
+        const students = [
+            { id: "STU-001", name: "Alice Thompson", class: "10-A", gender: "Female", dob: "2008-05-14" },
+            { id: "STU-002", name: "Ethan Walker", class: "10-B", gender: "Male", dob: "2008-08-22" },
+            { id: "STU-003", name: "Isabella Garcia", class: "10-A", gender: "Female", dob: "2008-11-03" },
+            { id: "STU-004", name: "Liam Miller", class: "11-C", gender: "Male", dob: "2007-01-30" },
+            { id: "STU-005", name: "Sophia Chen", class: "10-A", gender: "Female", dob: "2008-03-12" }
+        ];
+
+        const tableBody = document.getElementById('studentTableBody');
+        const themeToggle = document.getElementById('themeToggle');
+
+        function render(data) {
+            tableBody.innerHTML = data.map(s => `
+                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/40 transition-colors">
+                    <td class="px-6 py-4 font-mono text-xs text-blue-600 dark:text-blue-400">${s.id}</td>
+                    <td class="px-6 py-4 font-semibold text-gray-900 dark:text-gray-100">${s.name}</td>
+                    <td class="px-6 py-4">${s.class}</td>
+                    <td class="px-6 py-4">${s.gender}</td>
+                    <td class="px-6 py-4">${s.dob}</td>
+                </tr>
+            `).join('');
+            document.getElementById('noDataMessage').classList.toggle('hidden', data.length > 0);
+            document.getElementById('tableStats').textContent = `Showing ${data.length} students`;
+        }
+
+        // Toggle Logic
+        themeToggle.addEventListener('click', () => {
+            const isDark = document.documentElement.classList.toggle('dark');
+            localStorage.setItem('darkMode', isDark);
+        });
+
+        // Filter Logic
+        const filter = () => {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const cls = document.getElementById('classFilter').value;
+            const gen = document.getElementById('genderFilter').value;
+
+            const filtered = students.filter(s => 
+                (s.name.toLowerCase().includes(search) || s.id.toLowerCase().includes(search)) &&
+                (!cls || s.class === cls) &&
+                (!gen || s.gender === gen)
+            );
+            render(filtered);
+        };
+
+        ['searchInput', 'classFilter', 'genderFilter'].forEach(id => {
+            document.getElementById(id).addEventListener('input', filter);
+        });
+
+        // Mobile Sidebar
+        const sidebar = document.getElementById('sidebar');
+        const backdrop = document.getElementById('sidebarBackdrop');
+        document.getElementById('sidebarToggle').onclick = () => {
+            sidebar.classList.toggle('-translate-x-full');
+            backdrop.classList.toggle('hidden');
+        };
+        backdrop.onclick = () => {
+            sidebar.classList.add('-translate-x-full');
+            backdrop.classList.add('hidden');
+        };
+
+        // Init
+        render(students);
+    </script>
+</body>
+</html>

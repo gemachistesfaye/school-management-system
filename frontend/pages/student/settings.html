@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Settings | School Management System</title>
+    <!-- Tailwind CSS for modern styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons for consistent iconography -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* Custom transitions for smooth dark mode and hover effects */
+        .transition-all-custom {
+            transition: all 0.3s ease;
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: #475569;
+        }
+
+        /* Prevent layout shift when sidebar is toggled */
+        #sidebar {
+            z-index: 50;
+        }
+    </style>
+    <script>
+        // Configure Tailwind Dark Mode
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            200: '#bfdbfe',
+                            300: '#93c5fd',
+                            400: '#60a5fa',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 transition-all-custom min-h-screen">
+
+    <!-- Mobile Sidebar Backdrop -->
+    <div id="sidebar-backdrop" class="fixed inset-0 bg-black/50 hidden lg:hidden z-40" onclick="toggleSidebar()"></div>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="fixed left-0 top-0 h-full w-64 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out">
+        <div class="p-6">
+            <div class="flex items-center gap-3 text-primary-600 font-bold text-xl mb-8">
+                <div class="bg-primary-600 text-white p-2 rounded-lg">
+                    <i data-lucide="graduation-cap"></i>
+                </div>
+                <span>EduPortal</span>
+            </div>
+
+            <nav class="space-y-1">
+                <a href="./dashboard.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all-custom">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                    <span class="font-medium">Dashboard</span>
+                </a>
+                <a href="./attendance.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all-custom">
+                    <i data-lucide="calendar-check" class="w-5 h-5"></i>
+                    <span class="font-medium">Attendance</span>
+                </a>
+                <a href="./grades.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all-custom">
+                    <i data-lucide="file-text" class="w-5 h-5"></i>
+                    <span class="font-medium">Grades</span>
+                </a>
+                <a href="./settings.html" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 transition-all-custom">
+                    <i data-lucide="settings" class="w-5 h-5"></i>
+                    <span class="font-medium">Settings</span>
+                </a>
+            </nav>
+        </div>
+        
+        <div class="absolute bottom-4 w-full px-6">
+            <button onclick="handleLogout()" class="flex items-center gap-3 px-4 py-3 w-full rounded-xl text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 transition-all-custom">
+                <i data-lucide="log-out" class="w-5 h-5"></i>
+                <span class="font-medium">Logout</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="lg:ml-64 transition-all duration-300">
+        
+        <!-- Top Navbar -->
+        <header class="sticky top-0 z-30 flex items-center justify-between px-6 py-4 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border-bottom border-slate-200 dark:border-slate-700">
+            <div class="flex items-center gap-4">
+                <button onclick="toggleSidebar()" class="lg:hidden p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700">
+                    <i data-lucide="menu"></i>
+                </button>
+                <h1 class="text-xl font-bold">Account Settings</h1>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <!-- Theme Toggle -->
+                <button onclick="toggleDarkMode()" id="theme-toggle" class="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:ring-2 hover:ring-primary-500 transition-all-custom">
+                    <i data-lucide="sun" id="sun-icon" class="hidden w-5 h-5"></i>
+                    <i data-lucide="moon" id="moon-icon" class="w-5 h-5"></i>
+                </button>
+
+                <!-- Profile Info -->
+                <div class="flex items-center gap-3 pl-4 border-l border-slate-200 dark:border-slate-700">
+                    <div class="text-right hidden sm:block">
+                        <p id="nav-student-name" class="text-sm font-semibold">Alex Johnson</p>
+                        <p class="text-xs text-slate-500">Student ID: #ST-2024</p>
+                    </div>
+                    <img id="nav-profile-pic" src="https://ui-avatars.com/api/?name=Alex+Johnson&background=3b82f6&color=fff" alt="Profile" class="w-10 h-10 rounded-full border-2 border-primary-500 p-0.5">
+                </div>
+            </div>
+        </header>
+
+        <!-- Content Area -->
+        <div class="p-6 max-w-5xl mx-auto space-y-8">
+            
+            <!-- Success Message Box (Hidden by default) -->
+            <div id="toast" class="fixed top-20 right-6 z-50 transform translate-x-80 transition-transform duration-300 bg-emerald-500 text-white px-6 py-3 rounded-xl shadow-lg flex items-center gap-3">
+                <i data-lucide="check-circle" class="w-5 h-5"></i>
+                <span id="toast-message">Settings saved successfully!</span>
+            </div>
+
+            <!-- Profile Section Card -->
+            <section class="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+                <div class="p-6 border-b border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50">
+                    <h2 class="text-lg font-bold flex items-center gap-2">
+                        <i data-lucide="user" class="text-primary-500"></i>
+                        Personal Information
+                    </h2>
+                    <p class="text-sm text-slate-500">Update your personal details and contact info.</p>
+                </div>
+                
+                <form id="profile-form" class="p-6 space-y-6">
+                    <!-- Profile Picture Upload UI -->
+                    <div class="flex flex-col md:flex-row items-center gap-6 pb-6 border-b border-slate-100 dark:border-slate-700/50">
+                        <div class="relative group">
+                            <img id="form-profile-pic" src="https://ui-avatars.com/api/?name=Alex+Johnson&background=3b82f6&color=fff" alt="Profile Large" class="w-24 h-24 rounded-2xl object-cover border-4 border-slate-50 dark:border-slate-700 shadow-md">
+                            <label for="pic-upload" class="absolute inset-0 flex items-center justify-center bg-black/40 text-white opacity-0 group-hover:opacity-100 rounded-2xl cursor-pointer transition-opacity">
+                                <i data-lucide="camera" class="w-6 h-6"></i>
+                                <input type="file" id="pic-upload" class="hidden" accept="image/*">
+                            </label>
+                        </div>
+                        <div class="text-center md:text-left">
+                            <h3 class="font-bold text-slate-700 dark:text-slate-200">Profile Photo</h3>
+                            <p class="text-xs text-slate-500 mt-1">Recommended: Square image, max 2MB.</p>
+                            <div class="mt-3 flex gap-2">
+                                <label for="pic-upload" class="text-xs bg-slate-100 dark:bg-slate-700 px-3 py-1.5 rounded-lg font-medium cursor-pointer hover:bg-primary-500 hover:text-white transition-colors">Change Image</label>
+                                <button type="button" class="text-xs text-red-500 px-3 py-1.5 rounded-lg font-medium hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">Remove</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium mb-2 text-slate-600 dark:text-slate-400">Full Name</label>
+                            <input type="text" id="full-name" value="Alex Johnson" required
+                                class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent focus:ring-2 focus:ring-primary-500 outline-none transition-all-custom">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2 text-slate-600 dark:text-slate-400">Email Address</label>
+                            <input type="email" id="email" value="alex.j@school.edu" required
+                                class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent focus:ring-2 focus:ring-primary-500 outline-none transition-all-custom">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2 text-slate-600 dark:text-slate-400">Contact Number</label>
+                            <input type="tel" id="contact" value="+1 (555) 000-1234"
+                                class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent focus:ring-2 focus:ring-primary-500 outline-none transition-all-custom">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2 text-slate-600 dark:text-slate-400">Date of Birth</label>
+                            <input type="date" id="dob" value="2008-05-14"
+                                class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent focus:ring-2 focus:ring-primary-500 outline-none transition-all-custom">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2 text-slate-600 dark:text-slate-400">Gender</label>
+                            <select id="gender" class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent focus:ring-2 focus:ring-primary-500 outline-none transition-all-custom appearance-none">
+                                <option value="male" selected>Male</option>
+                                <option value="female">Female</option>
+                                <option value="other">Other</option>
+                                <option value="prefer-not">Prefer not to say</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2 text-slate-600 dark:text-slate-400">Class / Section</label>
+                            <input type="text" value="Grade 10 - Section B" disabled
+                                class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 text-slate-500 cursor-not-allowed">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium mb-2 text-slate-600 dark:text-slate-400">Residential Address</label>
+                            <textarea id="address" rows="3" placeholder="123 Education St, Knowledge City..."
+                                class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent focus:ring-2 focus:ring-primary-500 outline-none transition-all-custom">123 Learning Lane, Springfield</textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-end pt-4">
+                        <button type="submit" class="bg-primary-600 hover:bg-primary-700 text-white px-8 py-3 rounded-xl font-semibold shadow-lg shadow-primary-500/20 transition-all-custom active:scale-95">
+                            Save Changes
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Security Section Card -->
+            <section class="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+                <div class="p-6 border-b border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50">
+                    <h2 class="text-lg font-bold flex items-center gap-2">
+                        <i data-lucide="lock" class="text-primary-500"></i>
+                        Security & Password
+                    </h2>
+                    <p class="text-sm text-slate-500">Ensure your account is using a long, random password to stay secure.</p>
+                </div>
+                
+                <form id="password-form" class="p-6 space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium mb-2 text-slate-600 dark:text-slate-400">Current Password</label>
+                            <input type="password" id="current-pass" placeholder="••••••••" required
+                                class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent focus:ring-2 focus:ring-primary-500 outline-none transition-all-custom">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2 text-slate-600 dark:text-slate-400">New Password</label>
+                            <input type="password" id="new-pass" placeholder="••••••••" required
+                                class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent focus:ring-2 focus:ring-primary-500 outline-none transition-all-custom">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2 text-slate-600 dark:text-slate-400">Confirm Password</label>
+                            <input type="password" id="confirm-pass" placeholder="••••••••" required
+                                class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent focus:ring-2 focus:ring-primary-500 outline-none transition-all-custom">
+                        </div>
+                    </div>
+                    
+                    <div id="password-error" class="hidden text-red-500 text-sm flex items-center gap-2">
+                        <i data-lucide="alert-circle" class="w-4 h-4"></i>
+                        <span id="error-msg">Passwords do not match.</span>
+                    </div>
+
+                    <div class="flex justify-end">
+                        <button type="submit" class="bg-slate-900 dark:bg-slate-100 dark:text-slate-900 text-white px-8 py-3 rounded-xl font-semibold transition-all-custom active:scale-95 hover:opacity-90">
+                            Update Password
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Notifications Section -->
+            <section class="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+                <div class="p-6 border-b border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50">
+                    <h2 class="text-lg font-bold flex items-center gap-2">
+                        <i data-lucide="bell" class="text-primary-500"></i>
+                        Notification Preferences
+                    </h2>
+                    <p class="text-sm text-slate-500">Choose how you want to be notified about school updates.</p>
+                </div>
+                
+                <div class="p-6 space-y-4">
+                    <label class="flex items-center justify-between p-4 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-900/50 cursor-pointer transition-all-custom border border-transparent hover:border-slate-100 dark:hover:border-slate-700">
+                        <div class="flex items-center gap-4">
+                            <div class="p-2 bg-blue-100 dark:bg-blue-900/30 text-blue-600 rounded-lg">
+                                <i data-lucide="mail" class="w-5 h-5"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium">Email Notifications</p>
+                                <p class="text-xs text-slate-500">Receive grade reports and announcements via email.</p>
+                            </div>
+                        </div>
+                        <input type="checkbox" checked class="w-5 h-5 accent-primary-600">
+                    </label>
+
+                    <label class="flex items-center justify-between p-4 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-900/50 cursor-pointer transition-all-custom border border-transparent hover:border-slate-100 dark:hover:border-slate-700">
+                        <div class="flex items-center gap-4">
+                            <div class="p-2 bg-purple-100 dark:bg-purple-900/30 text-purple-600 rounded-lg">
+                                <i data-lucide="smartphone" class="w-5 h-5"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium">App Push Notifications</p>
+                                <p class="text-xs text-slate-500">Get instant alerts for class changes or attendance.</p>
+                            </div>
+                        </div>
+                        <input type="checkbox" class="w-5 h-5 accent-primary-600">
+                    </label>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        // 1. Sidebar Toggle Logic
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const backdrop = document.getElementById('sidebar-backdrop');
+            sidebar.classList.toggle('-translate-x-full');
+            backdrop.classList.toggle('hidden');
+        }
+
+        // 2. Dark Mode Logic
+        function initTheme() {
+            const theme = localStorage.getItem('theme') || 'light';
+            if (theme === 'dark') {
+                document.documentElement.classList.add('dark');
+                document.getElementById('sun-icon').classList.remove('hidden');
+                document.getElementById('moon-icon').classList.add('hidden');
+            } else {
+                document.documentElement.classList.remove('dark');
+                document.getElementById('sun-icon').classList.add('hidden');
+                document.getElementById('moon-icon').classList.remove('hidden');
+            }
+        }
+
+        function toggleDarkMode() {
+            const isDark = document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            
+            document.getElementById('sun-icon').classList.toggle('hidden');
+            document.getElementById('moon-icon').classList.toggle('hidden');
+        }
+
+        // 3. Form Handling & Data Storage Simulation
+        const profileForm = document.getElementById('profile-form');
+        const passwordForm = document.getElementById('password-form');
+        const toast = document.getElementById('toast');
+        const toastMessage = document.getElementById('toast-message');
+
+        function showToast(message, type = 'success') {
+            toastMessage.textContent = message;
+            toast.classList.remove('translate-x-80');
+            toast.classList.add('translate-x-0');
+            
+            if (type === 'error') {
+                toast.classList.replace('bg-emerald-500', 'bg-red-500');
+            } else {
+                toast.classList.replace('bg-red-500', 'bg-emerald-500');
+            }
+
+            setTimeout(() => {
+                toast.classList.add('translate-x-80');
+                toast.classList.remove('translate-x-0');
+            }, 3000);
+        }
+
+        // Profile Update
+        profileForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = document.getElementById('full-name').value;
+            const email = document.getElementById('email').value;
+            const contact = document.getElementById('contact').value;
+            const dob = document.getElementById('dob').value;
+            const gender = document.getElementById('gender').value;
+            const address = document.getElementById('address').value;
+
+            // Simulate save
+            const userData = { name, email, contact, dob, gender, address };
+            localStorage.setItem('student_profile', JSON.stringify(userData));
+
+            // Update Navbar and UI components
+            document.getElementById('nav-student-name').textContent = name;
+            const picSrc = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=3b82f6&color=fff`;
+            document.getElementById('nav-profile-pic').src = picSrc;
+            document.getElementById('form-profile-pic').src = picSrc;
+
+            showToast("Profile updated successfully!");
+        });
+
+        // Handle profile picture preview (Local only)
+        document.getElementById('pic-upload').addEventListener('change', function(e) {
+            if (e.target.files && e.target.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    document.getElementById('form-profile-pic').src = event.target.result;
+                    document.getElementById('nav-profile-pic').src = event.target.result;
+                }
+                reader.readAsDataURL(e.target.files[0]);
+                showToast("Image selected successfully.");
+            }
+        });
+
+        // Password Update
+        passwordForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const current = document.getElementById('current-pass').value;
+            const newPass = document.getElementById('new-pass').value;
+            const confirm = document.getElementById('confirm-pass').value;
+            const errorBox = document.getElementById('password-error');
+
+            errorBox.classList.add('hidden');
+
+            if (newPass !== confirm) {
+                document.getElementById('error-msg').textContent = "New passwords do not match!";
+                errorBox.classList.remove('hidden');
+                return;
+            }
+
+            if (newPass.length < 8) {
+                document.getElementById('error-msg').textContent = "Password must be at least 8 characters.";
+                errorBox.classList.remove('hidden');
+                return;
+            }
+
+            // Simulate API call
+            showToast("Password changed successfully!");
+            passwordForm.reset();
+        });
+
+        function handleLogout() {
+            if(confirm("Are you sure you want to logout?")) {
+                alert("Redirecting to login...");
+            }
+        }
+
+        // Load persisted data on init
+        window.onload = () => {
+            initTheme();
+            const savedData = JSON.parse(localStorage.getItem('student_profile'));
+            if (savedData) {
+                document.getElementById('full-name').value = savedData.name || "Alex Johnson";
+                document.getElementById('email').value = savedData.email || "alex.j@school.edu";
+                document.getElementById('contact').value = savedData.contact || "+1 (555) 000-1234";
+                document.getElementById('dob').value = savedData.dob || "2008-05-14";
+                document.getElementById('gender').value = savedData.gender || "male";
+                document.getElementById('address').value = savedData.address || "123 Learning Lane, Springfield";
+                
+                document.getElementById('nav-student-name').textContent = savedData.name;
+                const picSrc = `https://ui-avatars.com/api/?name=${encodeURIComponent(savedData.name)}&background=3b82f6&color=fff`;
+                document.getElementById('nav-profile-pic').src = picSrc;
+                document.getElementById('form-profile-pic').src = picSrc;
+            }
+        };
+    </script>
+</body>
+</html>

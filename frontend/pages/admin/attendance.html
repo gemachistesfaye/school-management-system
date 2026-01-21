@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Management | School Admin</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Configure Tailwind to use 'class' for dark mode
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2563eb',
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+    <style>
+        /* Custom styles to complement Tailwind */
+        .transition-all { transition: all 0.3s ease; }
+        .sidebar-item:hover { background-color: rgba(59, 130, 246, 0.1); }
+        .sidebar-item.active { background-color: rgba(59, 130, 246, 0.2); border-right: 4px solid #3b82f6; }
+        
+        /* Modal Backdrop */
+        #modalOverlay {
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(2px);
+        }
+
+        /* Hide scrollbar for Chrome, Safari and Opera */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 transition-colors duration-300">
+
+    <!-- Layout Wrapper -->
+    <div class="flex min-h-screen">
+
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 hidden md:flex flex-col fixed h-full z-20">
+ <div class="p-6 flex items-center justify-between">
+    <!-- Left: Icon + Name -->
+    <div class="flex items-center gap-3">
+        <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-sm">S</div>
+        <span class="text-xl font-bold tracking-tight dark:text-white">EduSmart</span>
+    </div>
+
+    <!-- Right: Theme Toggle -->
+    <button id="theme-toggle" class="flex items-center justify-center p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition">
+        <i id="theme-toggle-dark-icon" data-lucide="moon" class="w-5 h-5"></i>
+        <i id="theme-toggle-light-icon" data-lucide="sun" class="w-5 h-5 hidden"></i>
+    </button>
+</div>
+
+            
+            
+            <nav class="flex-1 px-4 space-y-2 mt-4">
+                <a href="./dashboard.html" class="sidebar-item flex items-center gap-3 p-3 rounded-lg text-gray-500 dark:text-gray-400">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a11 11 0 003 3h10a1 1 0 001-1V10M9 21h6"></path></svg>
+                    Dashboard
+                </a>
+                <a href="./attendance.html" class="sidebar-item active flex items-center gap-3 p-3 rounded-lg text-blue-600 dark:text-blue-400 font-semibold">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+                    Attendance
+                </a>
+                <a href="./students.html" class="sidebar-item flex items-center gap-3 p-3 rounded-lg text-gray-500 dark:text-gray-400">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                    Students
+                </a>
+            </nav>
+
+            <div class="p-4 border-t border-gray-200 dark:border-gray-700">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-blue-600 font-bold">AD</div>
+                    <div class="overflow-hidden">
+                        <p class="text-sm font-semibold truncate">Admin User</p>
+                        <p class="text-xs text-gray-500 truncate">admin@school.com</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 md:ml-64 flex flex-col min-w-0">
+            
+            <!-- Top Navbar -->
+            <header class="h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-4 md:px-8 sticky top-0 z-10">
+                <h1 class="text-xl font-bold md:block hidden">Attendance Management</h1>
+                <button class="md:hidden p-2 text-gray-600 dark:text-gray-300">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                </button>
+
+                <div class="flex items-center gap-4">
+        
+                    <div class="h-8 w-px bg-gray-200 dark:bg-gray-700 mx-2"></div>
+                    <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-bold">A</div>
+                </div>
+            </header>
+
+            <!-- Dashboard Content -->
+            <div class="p-4 md:p-8 space-y-6">
+                <!-- Action Bar -->
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div class="relative w-full md:w-96">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                        </span>
+                        <input type="text" id="searchInput" placeholder="Search by name or ID..." class="w-full pl-10 pr-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all">
+                    </div>
+                    <div class="flex gap-3">
+                        <select id="filterClass" class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-2 focus:outline-none text-sm">
+                            <option value="">All Classes</option>
+                            <option value="10-A">10-A</option>
+                            <option value="10-B">10-B</option>
+                            <option value="11-A">11-A</option>
+                        </select>
+                        <button onclick="openModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl font-semibold flex items-center gap-2 transition-all shadow-lg shadow-blue-500/20">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path d="M12 6v6m0 0v6m0-6h6m-6 0H6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                            Add Attendance
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Table Card -->
+                <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-sm overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-gray-50 dark:bg-gray-900/50 text-gray-500 dark:text-gray-400 text-sm uppercase font-semibold">
+                                    <th class="px-6 py-4">Student ID</th>
+                                    <th class="px-6 py-4">Student Name</th>
+                                    <th class="px-6 py-4">Class</th>
+                                    <th class="px-6 py-4">Date</th>
+                                    <th class="px-6 py-4">Status</th>
+                                    <th class="px-6 py-4 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="attendanceTableBody" class="divide-y divide-gray-100 dark:divide-gray-700 text-sm">
+                                <!-- Data injected by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal Overlay -->
+    <div id="modalOverlay" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden opacity-0 transition-opacity duration-300">
+        <div class="bg-white dark:bg-gray-800 w-full max-w-md rounded-2xl shadow-2xl transform scale-95 transition-transform duration-300 overflow-hidden" id="modalContent">
+            <div class="p-6 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
+                <h2 id="modalTitle" class="text-xl font-bold">Add Attendance</h2>
+                <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                </button>
+            </div>
+            
+            <form id="attendanceForm" class="p-6 space-y-4">
+                <input type="hidden" id="editId">
+                
+                <div>
+                    <label class="block text-sm font-medium mb-1 text-gray-600 dark:text-gray-400">Student ID</label>
+                    <select id="studentId" required class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        <option value="" disabled selected>Select Student ID</option>
+                        <option value="STD-001" data-name="John Doe" data-class="10-A">STD-001 (John Doe)</option>
+                        <option value="STD-002" data-name="Jane Smith" data-class="10-B">STD-002 (Jane Smith)</option>
+                        <option value="STD-003" data-name="Mike Johnson" data-class="11-A">STD-003 (Mike Johnson)</option>
+                        <option value="STD-004" data-name="Sarah Wilson" data-class="10-A">STD-004 (Sarah Wilson)</option>
+                    </select>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-1 text-gray-600 dark:text-gray-400">Student Name</label>
+                        <input type="text" id="studentName" readonly class="w-full bg-gray-100 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-2 text-gray-500 cursor-not-allowed">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1 text-gray-600 dark:text-gray-400">Class</label>
+                        <input type="text" id="studentClass" readonly class="w-full bg-gray-100 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-2 text-gray-500 cursor-not-allowed">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-1 text-gray-600 dark:text-gray-400">Date</label>
+                        <input type="date" id="attendanceDate" required class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1 text-gray-600 dark:text-gray-400">Status</label>
+                        <select id="attendanceStatus" required class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                            <option value="Present">Present</option>
+                            <option value="Absent">Absent</option>
+                            <option value="Late">Late</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="pt-4 flex gap-3">
+                    <button type="button" onclick="closeModal()" class="flex-1 px-4 py-2.5 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 font-semibold rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-all">
+                        Cancel
+                    </button>
+                    <button type="submit" class="flex-1 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow-lg shadow-blue-500/20 transition-all">
+                        Save Record
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed bottom-8 right-8 bg-gray-900 text-white px-6 py-3 rounded-xl shadow-2xl transform translate-y-24 opacity-0 transition-all duration-300 z-[60] flex items-center gap-3">
+        <span id="toastMsg">Action completed successfully</span>
+    </div>
+
+    <script>
+        /**
+         * INITIAL DATA
+         */
+        const initialData = [
+            { id: 1, studentId: 'STD-001', name: 'John Doe', class: '10-A', date: '2023-10-24', status: 'Present' },
+            { id: 2, studentId: 'STD-002', name: 'Jane Smith', class: '10-B', date: '2023-10-24', status: 'Absent' },
+            { id: 3, studentId: 'STD-003', name: 'Mike Johnson', class: '11-A', date: '2023-10-24', status: 'Late' },
+            { id: 4, studentId: 'STD-004', name: 'Sarah Wilson', class: '10-A', date: '2023-10-24', status: 'Present' },
+            { id: 5, studentId: 'STD-001', name: 'John Doe', class: '10-A', date: '2023-10-23', status: 'Present' },
+        ];
+
+        let attendanceData = JSON.parse(localStorage.getItem('attendanceData')) || initialData;
+
+        /**
+         * DOM ELEMENTS
+         */
+        const tableBody = document.getElementById('attendanceTableBody');
+        const modalOverlay = document.getElementById('modalOverlay');
+        const modalContent = document.getElementById('modalContent');
+        const attendanceForm = document.getElementById('attendanceForm');
+        const studentIdSelect = document.getElementById('studentId');
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        const searchInput = document.getElementById('searchInput');
+        const filterClass = document.getElementById('filterClass');
+        const sunIcon = document.getElementById('sunIcon');
+        const moonIcon = document.getElementById('moonIcon');
+
+        /**
+         * THEME MANAGEMENT
+         */
+        function initTheme() {
+            // Check for saved theme or system preference
+            const savedTheme = localStorage.getItem('theme');
+            const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            
+            const isDark = savedTheme === 'dark' || (!savedTheme && systemPrefersDark);
+            
+            if (isDark) {
+                document.documentElement.classList.add('dark');
+                sunIcon.classList.remove('hidden');
+                moonIcon.classList.add('hidden');
+            } else {
+                document.documentElement.classList.remove('dark');
+                sunIcon.classList.add('hidden');
+                moonIcon.classList.remove('hidden');
+            }
+        }
+
+        darkModeToggle.addEventListener('click', () => {
+            const isDarkModeNow = document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', isDarkModeNow ? 'dark' : 'light');
+            
+            if (isDarkModeNow) {
+                sunIcon.classList.remove('hidden');
+                moonIcon.classList.add('hidden');
+            } else {
+                sunIcon.classList.add('hidden');
+                moonIcon.classList.remove('hidden');
+            }
+        });
+
+        /**
+         * MODAL LOGIC
+         */
+        function openModal(editId = null) {
+            modalOverlay.classList.remove('hidden');
+            setTimeout(() => {
+                modalOverlay.classList.add('opacity-100');
+                modalContent.classList.remove('scale-95');
+                modalContent.classList.add('scale-100');
+            }, 10);
+
+            if (editId) {
+                const record = attendanceData.find(r => r.id === editId);
+                document.getElementById('modalTitle').innerText = 'Edit Attendance';
+                document.getElementById('editId').value = editId;
+                document.getElementById('studentId').value = record.studentId;
+                document.getElementById('studentName').value = record.name;
+                document.getElementById('studentClass').value = record.class;
+                document.getElementById('attendanceDate').value = record.date;
+                document.getElementById('attendanceStatus').value = record.status;
+            } else {
+                document.getElementById('modalTitle').innerText = 'Add Attendance';
+                attendanceForm.reset();
+                document.getElementById('editId').value = '';
+                document.getElementById('attendanceDate').valueAsDate = new Date();
+            }
+        }
+
+        function closeModal() {
+            modalOverlay.classList.remove('opacity-100');
+            modalContent.classList.remove('scale-100');
+            modalContent.classList.add('scale-95');
+            setTimeout(() => {
+                modalOverlay.classList.add('hidden');
+            }, 300);
+        }
+
+        /**
+         * FORM AUTO-FILL
+         */
+        studentIdSelect.addEventListener('change', (e) => {
+            const selectedOption = e.target.options[e.target.selectedIndex];
+            document.getElementById('studentName').value = selectedOption.dataset.name || '';
+            document.getElementById('studentClass').value = selectedOption.dataset.class || '';
+        });
+
+        /**
+         * RENDER TABLE
+         */
+        function renderTable(data = attendanceData) {
+            tableBody.innerHTML = '';
+            
+            data.forEach(item => {
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-50/50 dark:hover:bg-gray-700/30 transition-colors group';
+                
+                const statusColors = {
+                    'Present': 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
+                    'Absent': 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400',
+                    'Late': 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
+                };
+
+                row.innerHTML = `
+                    <td class="px-6 py-4 font-medium text-blue-600 dark:text-blue-400">${item.studentId}</td>
+                    <td class="px-6 py-4 font-semibold">${item.name}</td>
+                    <td class="px-6 py-4 text-gray-500 dark:text-gray-400">${item.class}</td>
+                    <td class="px-6 py-4 text-gray-500 dark:text-gray-400">${item.date}</td>
+                    <td class="px-6 py-4">
+                        <span class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${statusColors[item.status]}">
+                            ${item.status}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 text-right">
+                        <div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button onclick="openModal(${item.id})" class="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/50 rounded-lg transition-colors" title="Edit">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                            </button>
+                            <button onclick="deleteRecord(${item.id})" class="p-2 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/50 rounded-lg transition-colors" title="Delete">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-4v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+
+            if (data.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="6" class="px-6 py-12 text-center text-gray-400">No records found matching your criteria.</td></tr>`;
+            }
+        }
+
+        /**
+         * CRUD OPERATIONS
+         */
+        attendanceForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const editId = document.getElementById('editId').value;
+            const recordData = {
+                studentId: document.getElementById('studentId').value,
+                name: document.getElementById('studentName').value,
+                class: document.getElementById('studentClass').value,
+                date: document.getElementById('attendanceDate').value,
+                status: document.getElementById('attendanceStatus').value,
+            };
+
+            if (editId) {
+                const index = attendanceData.findIndex(r => r.id == editId);
+                attendanceData[index] = { ...attendanceData[index], ...recordData };
+                showToast('Record updated successfully');
+            } else {
+                const newRecord = {
+                    id: Date.now(),
+                    ...recordData
+                };
+                attendanceData.unshift(newRecord);
+                showToast('New attendance added');
+            }
+
+            saveAndRefresh();
+            closeModal();
+        });
+
+        function deleteRecord(id) {
+            // Native confirm works in the iframe as per instructions
+            if (confirm('Are you sure you want to remove this attendance record?')) {
+                attendanceData = attendanceData.filter(r => r.id !== id);
+                saveAndRefresh();
+                showToast('Record deleted');
+            }
+        }
+
+        function saveAndRefresh() {
+            localStorage.setItem('attendanceData', JSON.stringify(attendanceData));
+            renderTable();
+        }
+
+        /**
+         * SEARCH & FILTER
+         */
+        function handleFilters() {
+            const query = searchInput.value.toLowerCase();
+            const classVal = filterClass.value;
+
+            const filtered = attendanceData.filter(item => {
+                const matchesSearch = item.name.toLowerCase().includes(query) || item.studentId.toLowerCase().includes(query);
+                const matchesClass = classVal === "" || item.class === classVal;
+                return matchesSearch && matchesClass;
+            });
+
+            renderTable(filtered);
+        }
+
+        searchInput.addEventListener('input', handleFilters);
+        filterClass.addEventListener('change', handleFilters);
+
+        /**
+         * UI HELPERS
+         */
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMsg').innerText = msg;
+            toast.classList.remove('translate-y-24', 'opacity-0');
+            
+            setTimeout(() => {
+                toast.classList.add('translate-y-24', 'opacity-0');
+            }, 3000);
+        }
+
+        // Initialize on Load
+        window.addEventListener('DOMContentLoaded', () => {
+            initTheme();
+            renderTable();
+        });
+    </script>
+
+    <script>
+    // Render all Lucide icons
+    lucide.replace();
+</script>
+
+
+    <script src="../../js/app.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Students | EduManage Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // CONFIGURATION: Ensure Tailwind recognizes 'class' for dark mode
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            200: '#bfdbfe',
+                            300: '#93c5fd',
+                            400: '#60a5fa',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                        }
+                    }
+                }
+            }
+        };
+
+        // CRITICAL: Immediate Theme Application to prevent FOUC (Flash of Unstyled Content)
+        (function() {
+            const theme = localStorage.getItem('school_admin_theme') || 
+                         (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            if (theme === 'dark') document.documentElement.classList.add('dark');
+            else document.documentElement.classList.remove('dark');
+        })();
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+        }
+        
+        .dark .glass-panel {
+            background: rgba(30, 41, 59, 0.8);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .dark ::-webkit-scrollbar-thumb { background: #475569; }
+
+        /* Modal Animation */
+        .modal-enter { opacity: 0; transform: scale(0.95); }
+        .modal-active { opacity: 1; transform: scale(1); transition: all 0.2s ease-out; }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 antialiased">
+
+    <!-- App Shell -->
+    <div class="flex min-h-screen overflow-hidden">
+        
+        <!-- Sidebar -->
+        <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out">
+            <div class="h-full flex flex-col">
+ <div class="h-full flex flex-col">
+                <div class="p-6 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-sm">S</div>
+                        <span class="text-xl font-bold tracking-tight dark:text-white">EduSmart</span>
+                    </div>
+
+                    <!-- Sidebar Theme Toggle -->
+                    <button id="theme-toggle" class="flex items-center justify-center p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                        <i id="theme-toggle-dark-icon" data-lucide="moon" class="w-5 h-5"></i>
+                        <i id="theme-toggle-light-icon" data-lucide="sun" class="w-5 h-5 hidden"></i>
+                    </button>
+                </div>
+
+                <nav class="flex-1 px-4 py-4 space-y-1">
+                    <a href="./dashboard.html" class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all group">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                        <span class="font-medium">Dashboard</span>
+                    </a>
+                    <a href="./students.html" class="flex items-center gap-3 px-4 py-3 bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 rounded-xl font-semibold">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                        <span>Students</span>
+                    </a>
+                    <a href="./classes.html" class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z"></path></svg>
+                        <span>Classes</span>
+                    </a>
+                </nav>
+
+                <div class="p-4 border-t border-slate-200 dark:border-slate-800">
+                    <div class="flex items-center gap-3 p-2 bg-slate-50 dark:bg-slate-800/50 rounded-2xl">
+                        <div class="w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900/40 flex items-center justify-center text-primary-700 dark:text-primary-300 font-bold">JD</div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm font-semibold truncate">Jane Doe</p>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Principal</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Wrapper -->
+        <div class="flex-1 flex flex-col lg:ml-64 w-full min-h-screen">
+            
+            <!-- Navbar -->
+            <header class="sticky top-0 z-40 h-16 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-6 flex items-center justify-between">
+                <button id="sidebarToggle" class="lg:hidden p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                </button>
+                
+                <div class="hidden md:flex items-center gap-2 text-slate-500 text-sm">
+                    <span>Admin</span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+                    <span class="text-slate-900 dark:text-white font-medium">Student Management</span>
+                </div>
+
+                <div class="flex items-center gap-4">
+                    <!-- Theme Toggle -->
+                    <button id="themeToggle" class="relative inline-flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:ring-2 hover:ring-primary-500 transition-all">
+                        <svg id="sunIcon" class="hidden w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h1M4 12H3m15.364-6.364l.707.707M6.343 17.657l.707.707M16.071 16.071l.707.707M7.929 7.929l.707.707M12 8a4 4 0 100 8 4 4 0 000-8z"></path></svg>
+                        <svg id="moonIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                    </button>
+                    
+                    <button class="p-2 text-slate-500 hover:text-primary-600 dark:hover:text-primary-400">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Main Content Area -->
+            <main class="p-6 space-y-6">
+                
+                <!-- Page Header -->
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Student Directory</h2>
+                        <p class="text-slate-500 dark:text-slate-400">Manage and monitor student information effortlessly.</p>
+                    </div>
+                    <button id="addStudentBtn" class="bg-primary-600 hover:bg-primary-700 text-white px-6 py-2.5 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all shadow-lg shadow-primary-500/20 active:scale-95">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+                        Add New Student
+                    </button>
+                </div>
+
+                <!-- Filters & Search -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="relative group">
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 group-focus-within:text-primary-500 transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                        </span>
+                        <input type="text" id="searchInput" placeholder="Search by name, ID, or phone..." class="w-full pl-10 pr-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 transition-all shadow-sm">
+                    </div>
+                    <select id="classFilter" class="px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl outline-none focus:ring-2 focus:ring-primary-500/50 transition-all shadow-sm cursor-pointer">
+                        <option value="">All Classes</option>
+                        <option value="Grade 9">Grade 9</option>
+                        <option value="Grade 10">Grade 10</option>
+                        <option value="Grade 11">Grade 11</option>
+                        <option value="Grade 12">Grade 12</option>
+                    </select>
+                    <div class="flex items-center gap-2 px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm">
+                        <span class="text-sm font-medium text-slate-500">Total:</span>
+                        <span id="studentCount" class="text-sm font-bold text-primary-600 dark:text-primary-400">0</span>
+                    </div>
+                </div>
+
+                <!-- Student Table Card -->
+                <div class="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-50/50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-widest">
+                                    <th class="px-6 py-5">Student</th>
+                                    <th class="px-6 py-5">ID</th>
+                                    <th class="px-6 py-5">Class & Section</th>
+                                    <th class="px-6 py-5">Contact</th>
+                                    <th class="px-6 py-5">Gender & DOB</th>
+                                    <th class="px-6 py-5 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="studentTableBody" class="divide-y divide-slate-100 dark:divide-slate-800">
+                                <!-- Loaded via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- Empty State -->
+                    <div id="emptyState" class="hidden flex flex-col items-center justify-center p-20 text-center">
+                        <div class="w-20 h-20 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-400 mb-4">
+                            <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                        </div>
+                        <h3 class="text-lg font-bold">No students found</h3>
+                        <p class="text-slate-500 dark:text-slate-400 max-w-xs">Adjust your search or add a new student to the records.</p>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Student Form Modal -->
+    <div id="modalOverlay" class="fixed inset-0 z-[60] bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div id="modalContent" class="bg-white dark:bg-slate-900 w-full max-w-lg rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden transform transition-all modal-enter">
+            <div class="px-8 py-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
+                <h3 id="modalTitle" class="text-xl font-bold text-slate-800 dark:text-white">Add New Student</h3>
+                <button onclick="toggleModal(false)" class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            
+            <form id="studentForm" class="p-8 space-y-5">
+                <input type="hidden" id="editIndex" value="-1">
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Student ID</label>
+                        <input type="text" id="idInput" required placeholder="STU-2024-001" class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none">
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Gender</label>
+                        <select id="genderInput" class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none">
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="space-y-1.5">
+                    <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Full Name</label>
+                    <input type="text" id="nameInput" required placeholder="Johnathan Doe" class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Class</label>
+                        <input type="text" id="classInput" required placeholder="Grade 10" class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none">
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Section</label>
+                        <input type="text" id="sectionInput" required placeholder="A" class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Date of Birth</label>
+                        <input type="date" id="dobInput" required class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none">
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Parent Phone</label>
+                        <input type="tel" id="phoneInput" required placeholder="+1 (555) 000-0000" class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none">
+                    </div>
+                </div>
+
+                <div class="pt-6 flex gap-3">
+                    <button type="button" onclick="toggleModal(false)" class="flex-1 px-4 py-3 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-xl font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">Cancel</button>
+                    <button type="submit" class="flex-1 px-4 py-3 bg-primary-600 text-white rounded-xl font-bold hover:bg-primary-700 transition-all shadow-lg shadow-primary-500/30">Save Record</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Confirm Delete Modal -->
+    <div id="deleteOverlay" class="fixed inset-0 z-[70] bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-900 w-full max-w-sm rounded-3xl shadow-2xl p-8 border border-slate-200 dark:border-slate-800">
+            <div class="w-16 h-16 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+            </div>
+            <h4 class="text-xl font-bold text-center mb-2">Confirm Delete</h4>
+            <p class="text-slate-500 dark:text-slate-400 text-center mb-8">Are you sure you want to remove this student record? This cannot be undone.</p>
+            <div class="flex gap-3">
+                <button onclick="toggleDeleteModal(false)" class="flex-1 px-4 py-2.5 bg-slate-100 dark:bg-slate-800 rounded-xl font-bold">No, Keep</button>
+                <button id="confirmDeleteBtn" class="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-xl font-bold hover:bg-red-700 shadow-lg shadow-red-500/20">Yes, Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. DATA STATE ---
+        let students = JSON.parse(localStorage.getItem('edu_manage_students')) || [
+            { id: 'STU-2024-001', name: 'Alex Thompson', class: 'Grade 10', section: 'A', gender: 'Male', dob: '2008-04-12', phone: '555-0192' },
+            { id: 'STU-2024-002', name: 'Samantha Reed', class: 'Grade 11', section: 'B', gender: 'Female', dob: '2007-11-23', phone: '555-0188' },
+            { id: 'STU-2024-003', name: 'Liam Wilson', class: 'Grade 10', section: 'A', gender: 'Male', dob: '2008-01-05', phone: '555-0177' },
+            { id: 'STU-2024-004', name: 'Sophia Chen', class: 'Grade 12', section: 'C', gender: 'Female', dob: '2006-08-15', phone: '555-0166' },
+            { id: 'STU-2024-005', name: 'Marcus Jordan', class: 'Grade 9', section: 'D', gender: 'Male', dob: '2009-03-30', phone: '555-0155' },
+            { id: 'STU-2024-006', name: 'Olivia Garcia', class: 'Grade 11', section: 'A', gender: 'Female', dob: '2007-06-21', phone: '555-0144' }
+        ];
+
+        let deleteIndex = -1;
+
+        // --- 2. DOM ELEMENTS ---
+        const tableBody = document.getElementById('studentTableBody');
+        const emptyState = document.getElementById('emptyState');
+        const countDisplay = document.getElementById('studentCount');
+        const searchInput = document.getElementById('searchInput');
+        const classFilter = document.getElementById('classFilter');
+        const themeToggle = document.getElementById('themeToggle');
+        const sunIcon = document.getElementById('sunIcon');
+        const moonIcon = document.getElementById('moonIcon');
+        const studentForm = document.getElementById('studentForm');
+        const modalOverlay = document.getElementById('modalOverlay');
+        const modalContent = document.getElementById('modalContent');
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const sidebar = document.getElementById('sidebar');
+
+        // --- 3. THEME LOGIC ---
+        function updateThemeIcons() {
+            const isDark = document.documentElement.classList.contains('dark');
+            sunIcon.classList.toggle('hidden', !isDark);
+            moonIcon.classList.toggle('hidden', isDark);
+        }
+
+        themeToggle.addEventListener('click', () => {
+            const isDark = document.documentElement.classList.toggle('dark');
+            localStorage.setItem('school_admin_theme', isDark ? 'dark' : 'light');
+            updateThemeIcons();
+        });
+
+        // --- 4. CRUD OPERATIONS ---
+        function renderTable(data = students) {
+            tableBody.innerHTML = '';
+            countDisplay.innerText = data.length;
+
+            if (data.length === 0) {
+                emptyState.classList.remove('hidden');
+                return;
+            }
+            emptyState.classList.add('hidden');
+
+            data.forEach((student, index) => {
+                const originalIndex = students.indexOf(student);
+                const row = document.createElement('tr');
+                row.className = 'group hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors';
+                row.innerHTML = `
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center font-bold text-slate-500 dark:text-slate-400 text-xs">
+                                ${student.name.split(' ').map(n => n[0]).join('')}
+                            </div>
+                            <span class="font-bold text-slate-900 dark:text-white">${student.name}</span>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="px-2 py-1 bg-slate-100 dark:bg-slate-800 rounded-lg text-xs font-mono font-medium text-slate-600 dark:text-slate-400">${student.id}</span>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="text-sm font-semibold">${student.class}</div>
+                        <div class="text-xs text-slate-500">Section ${student.section}</div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="text-sm">${student.phone}</div>
+                        <div class="text-xs text-primary-500 font-medium">Primary Parent</div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="text-sm">${student.gender}</div>
+                        <div class="text-xs text-slate-500">${student.dob}</div>
+                    </td>
+                    <td class="px-6 py-4 text-right">
+                        <div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button onclick="editStudent(${originalIndex})" class="p-2 text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-xl transition-all" title="Edit">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                            </button>
+                            <button onclick="triggerDelete(${originalIndex})" class="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-all" title="Delete">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+
+            localStorage.setItem('edu_manage_students', JSON.stringify(students));
+        }
+
+        studentForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const editIdx = parseInt(document.getElementById('editIndex').value);
+            
+            const studentData = {
+                id: document.getElementById('idInput').value,
+                name: document.getElementById('nameInput').value,
+                class: document.getElementById('classInput').value,
+                section: document.getElementById('sectionInput').value,
+                gender: document.getElementById('genderInput').value,
+                dob: document.getElementById('dobInput').value,
+                phone: document.getElementById('phoneInput').value,
+            };
+
+            if (editIdx === -1) {
+                students.unshift(studentData);
+            } else {
+                students[editIdx] = studentData;
+            }
+
+            toggleModal(false);
+            renderTable();
+        });
+
+        function editStudent(index) {
+            const s = students[index];
+            document.getElementById('editIndex').value = index;
+            document.getElementById('idInput').value = s.id;
+            document.getElementById('nameInput').value = s.name;
+            document.getElementById('classInput').value = s.class;
+            document.getElementById('sectionInput').value = s.section;
+            document.getElementById('genderInput').value = s.gender;
+            document.getElementById('dobInput').value = s.dob;
+            document.getElementById('phoneInput').value = s.phone;
+            
+            document.getElementById('modalTitle').innerText = "Edit Student Profile";
+            toggleModal(true);
+        }
+
+        function triggerDelete(index) {
+            deleteIndex = index;
+            toggleDeleteModal(true);
+        }
+
+        document.getElementById('confirmDeleteBtn').addEventListener('click', () => {
+            if (deleteIndex > -1) {
+                students.splice(deleteIndex, 1);
+                renderTable();
+                toggleDeleteModal(false);
+            }
+        });
+
+        // --- 5. SEARCH & FILTER ---
+        function handleFilter() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const classValue = classFilter.value;
+
+            const filtered = students.filter(s => {
+                const matchesSearch = s.name.toLowerCase().includes(searchTerm) || 
+                                      s.id.toLowerCase().includes(searchTerm) ||
+                                      s.phone.includes(searchTerm);
+                const matchesClass = classValue === "" || s.class === classValue;
+                return matchesSearch && matchesClass;
+            });
+
+            renderTable(filtered);
+        }
+
+        searchInput.addEventListener('input', handleFilter);
+        classFilter.addEventListener('change', handleFilter);
+
+        // --- 6. UI TOGGLES ---
+        function toggleModal(show) {
+            if (show) {
+                modalOverlay.classList.remove('hidden');
+                modalOverlay.classList.add('flex');
+                setTimeout(() => modalContent.classList.replace('modal-enter', 'modal-active'), 10);
+                document.body.style.overflow = 'hidden';
+            } else {
+                modalContent.classList.replace('modal-active', 'modal-enter');
+                setTimeout(() => {
+                    modalOverlay.classList.replace('flex', 'hidden');
+                    studentForm.reset();
+                    document.getElementById('editIndex').value = "-1";
+                    document.getElementById('modalTitle').innerText = "Add New Student";
+                }, 200);
+                document.body.style.overflow = 'auto';
+            }
+        }
+
+        function toggleDeleteModal(show) {
+            const el = document.getElementById('deleteOverlay');
+            if (show) {
+                el.classList.remove('hidden');
+                el.classList.add('flex');
+            } else {
+                el.classList.replace('flex', 'hidden');
+                deleteIndex = -1;
+            }
+        }
+
+        document.getElementById('addStudentBtn').addEventListener('click', () => toggleModal(true));
+        sidebarToggle.addEventListener('click', () => sidebar.classList.toggle('-translate-x-full'));
+
+        // Close sidebar on small screens when clicking outside
+        window.addEventListener('click', (e) => {
+            if (window.innerWidth < 1024 && !sidebar.contains(e.target) && !sidebarToggle.contains(e.target)) {
+                sidebar.classList.add('-translate-x-full');
+            }
+        });
+
+        // Initialize
+        updateThemeIcons();
+        renderTable();
+    </script>
+
+     <script src="../../js/app.js"></script>
+</body>
+</html>

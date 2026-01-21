@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Settings | School Management System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Critical: Tailwind Dark Mode Configuration
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .transition-theme {
+            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, transform 0.2s ease;
+        }
+
+        .nav-link.active {
+            background-color: #3b82f6;
+            color: white;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .profile-upload-overlay {
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .profile-container:hover .profile-upload-overlay {
+            opacity: 1;
+        }
+        
+        /* Smooth backdrop for sidebar on mobile */
+        #sidebar-overlay.active {
+            display: block;
+        }
+    </style>
+</head>
+<body class="transition-theme bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 font-sans">
+
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-40 hidden lg:hidden"></div>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="fixed top-0 left-0 h-full w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 z-50 transition-transform -translate-x-full lg:translate-x-0 transition-theme">
+        <div class="p-6">
+            <div class="flex items-center gap-3 text-blue-600 dark:text-blue-400">
+                <i class="fas fa-graduation-cap text-3xl"></i>
+                <span class="text-xl font-bold tracking-tight">EduNexus</span>
+            </div>
+        </div>
+
+        <nav class="mt-4 px-4 space-y-1">
+            <a href="./dashboard.html" class="nav-link flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                <i class="fas fa-th-large w-5"></i> Dashboard
+            </a>
+            <a href="./students.html" class="nav-link flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                <i class="fas fa-users w-5"></i> Students
+            </a>
+            <a href="./settings.html" class="nav-link active flex items-center gap-3 p-3 rounded-lg transition-colors">
+                <i class="fas fa-cog w-5"></i> Settings
+            </a>
+        </nav>
+
+        <div class="absolute bottom-0 w-full p-4 border-t border-gray-200 dark:border-gray-700">
+            <button class="flex items-center gap-3 p-3 w-full text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="lg:ml-64 min-h-screen flex flex-col transition-theme">
+        
+        <!-- Header -->
+        <header class="h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-4 lg:px-8 sticky top-0 z-30 transition-theme">
+            <button id="menu-toggle" class="lg:hidden text-gray-500 hover:text-blue-600">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+
+            <div class="flex items-center gap-4 ml-auto">
+                <!-- Theme Toggle Button -->
+                <button id="theme-toggle" class="p-2.5 rounded-xl bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-300 hover:ring-2 hover:ring-blue-400 transition-all">
+                    <i id="theme-icon" class="fas fa-moon"></i>
+                </button>
+
+                <!-- Profile Info -->
+                <div class="flex items-center gap-3 border-l border-gray-200 dark:border-gray-700 pl-4">
+                    <div class="text-right hidden sm:block">
+                        <p id="nav-teacher-name" class="text-sm font-semibold">Prof. Sarah Jenkins</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Senior Instructor</p>
+                    </div>
+                    <img id="nav-profile-img" class="w-10 h-10 rounded-full border-2 border-blue-500 object-cover" src="https://ui-avatars.com/api/?name=S+J&background=3b82f6&color=fff" alt="Profile">
+                </div>
+            </div>
+        </header>
+
+        <main class="p-4 lg:p-8 max-w-5xl">
+            <div class="mb-8">
+                <h1 class="text-2xl font-bold">Account Settings</h1>
+                <p class="text-gray-500 dark:text-gray-400">Manage your profile and appearance.</p>
+            </div>
+
+            <!-- Profile Section -->
+            <section class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden mb-8 transition-theme">
+                <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+                    <h2 class="text-lg font-semibold flex items-center gap-2">
+                        <i class="fas fa-user-circle text-blue-500"></i> Profile Photo
+                    </h2>
+                </div>
+                
+                <div class="p-6">
+                    <div class="flex flex-col sm:flex-row items-center gap-6">
+                        <div class="relative group profile-container">
+                            <img id="profile-preview" class="w-24 h-24 rounded-full border-4 border-white dark:border-gray-700 shadow-lg object-cover" src="https://ui-avatars.com/api/?name=S+J&background=3b82f6&color=fff" alt="Preview">
+                            <label for="profile-upload" class="profile-upload-overlay absolute inset-0 flex items-center justify-center bg-black/40 rounded-full cursor-pointer">
+                                <i class="fas fa-camera text-white text-xl"></i>
+                            </label>
+                            <input type="file" id="profile-upload" class="hidden" accept="image/*">
+                        </div>
+                        <div class="text-center sm:text-left">
+                            <h3 class="font-bold text-lg">Your Photo</h3>
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">Upload a new avatar or remove the current one.</p>
+                            <div class="flex gap-2 justify-center sm:justify-start">
+                                <label for="profile-upload" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium cursor-pointer hover:bg-blue-700 transition-colors">
+                                    Update Image
+                                </label>
+                                <button id="remove-photo" class="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-red-500 rounded-lg text-sm font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+                                    Remove
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Details Section -->
+            <section class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 transition-theme">
+                <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+                    <h2 class="text-lg font-semibold">General Information</h2>
+                </div>
+                <form id="profile-form" class="p-6 space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Full Name</label>
+                            <input type="text" id="teacher-name" name="fullName" class="w-full p-2.5 rounded-lg border bg-gray-50 dark:bg-gray-900 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 outline-none transition-theme" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Email</label>
+                            <input type="email" id="teacher-email" class="w-full p-2.5 rounded-lg border bg-gray-50 dark:bg-gray-900 border-gray-300 dark:border-gray-600 outline-none transition-theme">
+                        </div>
+                    </div>
+                    <div class="flex justify-end pt-4">
+                        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium shadow-lg transition-all">
+                            Save Changes
+                        </button>
+                    </div>
+                </form>
+            </section>
+        </main>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-white dark:bg-gray-800 border-l-4 border-green-500 p-4 rounded shadow-2xl min-w-[300px] flex items-center gap-3">
+        <i class="fas fa-check-circle text-green-500"></i>
+        <span id="toast-message">Settings updated!</span>
+    </div>
+
+    <script>
+        /**
+         * THEME ENGINE
+         */
+        const themeToggle = document.getElementById('theme-toggle');
+        const themeIcon = document.getElementById('theme-icon');
+
+        function applyTheme(theme) {
+            if (theme === 'dark') {
+                document.documentElement.classList.add('dark');
+                themeIcon.className = 'fas fa-sun text-yellow-400';
+            } else {
+                document.documentElement.classList.remove('dark');
+                themeIcon.className = 'fas fa-moon';
+            }
+        }
+
+        // Init Theme
+        const currentTheme = localStorage.getItem('theme') || 
+            (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        
+        applyTheme(currentTheme);
+
+        themeToggle.addEventListener('click', () => {
+            const newTheme = document.documentElement.classList.contains('dark') ? 'light' : 'dark';
+            localStorage.setItem('theme', newTheme);
+            applyTheme(newTheme);
+        });
+
+        /**
+         * PROFILE & IMAGE LOGIC
+         */
+        const profileUpload = document.getElementById('profile-upload');
+        const profilePreview = document.getElementById('profile-preview');
+        const navProfileImg = document.getElementById('nav-profile-img');
+
+        profileUpload.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const imgData = event.target.result;
+                    profilePreview.src = imgData;
+                    navProfileImg.src = imgData;
+                    localStorage.setItem('profile_img', imgData);
+                    showToast("New photo applied!");
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        document.getElementById('remove-photo').addEventListener('click', () => {
+            const name = document.getElementById('teacher-name').value || "Teacher";
+            const avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=3b82f6&color=fff`;
+            profilePreview.src = avatar;
+            navProfileImg.src = avatar;
+            localStorage.removeItem('profile_img');
+            showToast("Photo removed.");
+        });
+
+        /**
+         * FORM MANAGEMENT
+         */
+        const loadData = () => {
+            const saved = JSON.parse(localStorage.getItem('teacher_data')) || {
+                fullName: "Sarah Jenkins",
+                email: "sarah.j@school.edu"
+            };
+            document.getElementById('teacher-name').value = saved.fullName;
+            document.getElementById('teacher-email').value = saved.email;
+            document.getElementById('nav-teacher-name').innerText = saved.fullName;
+
+            const savedImg = localStorage.getItem('profile_img');
+            if (savedImg) {
+                profilePreview.src = savedImg;
+                navProfileImg.src = savedImg;
+            }
+        };
+
+        document.getElementById('profile-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const data = {
+                fullName: document.getElementById('teacher-name').value,
+                email: document.getElementById('teacher-email').value
+            };
+            localStorage.setItem('teacher_data', JSON.stringify(data));
+            document.getElementById('nav-teacher-name').innerText = data.fullName;
+            showToast("Settings saved successfully!");
+        });
+
+        /**
+         * MOBILE UI
+         */
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+        document.getElementById('menu-toggle').addEventListener('click', () => {
+            sidebar.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('hidden');
+        });
+        overlay.addEventListener('click', () => {
+            sidebar.classList.add('-translate-x-full');
+            overlay.classList.add('hidden');
+        });
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-message').innerText = msg;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => toast.classList.add('translate-y-20', 'opacity-0'), 3000);
+        }
+
+        window.onload = loadData;
+    </script>
+</body>
+</html>
