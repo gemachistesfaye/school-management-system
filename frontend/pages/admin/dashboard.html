@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard | School Management System</title>
-    <!-- Tailwind CSS CDN with Dark Mode support -->
+     <link rel="stylesheet" href="../../css/style.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        // Configure Tailwind to use 'class' for dark mode
+
         tailwind.config = {
             darkMode: 'class',
             theme: {
@@ -24,11 +24,10 @@
 <script>
    window.onload = () => {
        renderClasses();
-       lucide.createIcons(); // This turns data-lucide into actual SVG icons
+       lucide.createIcons(); 
    };
 </script>
     <style>
-        /* Custom scrollbar */
         ::-webkit-scrollbar {
             width: 6px;
         }
@@ -50,7 +49,7 @@
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         
-        /* Active state for sidebar links */
+
         .nav-item.active {
             background-color: #eff6ff;
             color: #2563eb;
@@ -65,14 +64,13 @@
 </head>
 <body class="bg-gray-50 dark:bg-slate-900 text-gray-800 dark:text-gray-100 font-sans transition-colors duration-200">
 
-    <!-- Mobile Sidebar Backdrop -->
     <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-20 hidden lg:hidden"></div>
 
     <div class="flex h-screen overflow-hidden">
         
-        <!-- SIDEBAR -->
+   
         <aside id="sidebar" class="fixed inset-y-0 left-0 bg-white dark:bg-slate-800 w-64 z-30 transform -translate-x-full lg:translate-x-0 lg:static lg:inset-0 shadow-lg flex flex-col border-r border-gray-100 dark:border-slate-700">
-            <!-- Sidebar Header -->
+         
             <div class="h-16 flex items-center justify-between px-6 border-b border-gray-100 dark:border-slate-700">
                 <div class="flex items-center gap-2">
                     <div class="bg-blue-600 p-1.5 rounded-lg text-white">
@@ -87,7 +85,7 @@
 
             </div>
 
-            <!-- Navigation Links -->
+    
             <nav class="flex-1 mt-4 space-y-1">
                 <a href="#" class="nav-item active flex items-center px-6 py-3 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors" data-page="dashboard">
                     <i data-lucide="layout-dashboard" class="w-5 h-5 mr-3"></i>
@@ -108,11 +106,16 @@
                 <a href="./attendance.html" class="nav-item flex items-center px-6 py-3 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors" data-page="attendance">
                     <i data-lucide="calendar-check" class="w-5 h-5 mr-3"></i>
                     <span class="font-medium">Attendance</span>
-                </a>
-                <a href="./grades.html" class="nav-item flex items-center px-6 py-3 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors" data-page="grades">
-                    <i data-lucide="trending-up" class="w-5 h-5 mr-3"></i>
-                    <span class="font-medium">Grades</span>
-                </a>
+
+<a href="./grades.html" 
+   class="nav-item flex items-center px-6 py-3 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors" 
+   data-page="grades">
+    <i data-lucide="trending-up" class="w-5 h-5 mr-3"></i>
+    <span class="font-medium">Grades</span>
+</a>
+
+
+
                 <div class="pt-4 pb-2 px-6">
                     <span class="text-xs font-semibold text-gray-400 dark:text-slate-500 uppercase tracking-wider">System</span>
                 </div>
@@ -122,7 +125,7 @@
                 </a>
             </nav>
 
-            <!-- Sidebar Footer -->
+   
             <div class="p-4 border-t border-gray-100 dark:border-slate-700">
                 <button id="logout-btn" class="flex items-center w-full px-4 py-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors">
                     <i data-lucide="log-out" class="w-5 h-5 mr-3"></i>
@@ -131,10 +134,10 @@
             </div>
         </aside>
 
-        <!-- MAIN CONTENT -->
+
         <main class="flex-1 flex flex-col overflow-y-auto relative">
             
-            <!-- TOP NAVBAR -->
+
             <header class="h-16 bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 flex items-center justify-between px-4 lg:px-8 sticky top-0 z-10 transition-colors">
                 <div class="flex items-center gap-4">
  
@@ -142,7 +145,7 @@
                 </div>
 
                 <div class="flex items-center gap-3 md:gap-6">
-                    <!-- Dark Mode Toggle -->
+
                    
 
                     <div class="flex items-center gap-3">
@@ -157,17 +160,17 @@
                 </div>
             </header>
 
-            <!-- CONTENT AREA -->
+
             <div class="p-4 lg:p-8 max-w-7xl mx-auto w-full">
-                <!-- Welcome Section -->
+ 
                 <div class="mb-8">
                     <h2 class="text-2xl font-bold text-gray-800 dark:text-white">Welcome Back, Admin!</h2>
                     <p class="text-gray-500 dark:text-slate-400 mt-1">Here is what's happening at your school today.</p>
                 </div>
 
-                <!-- STATISTIC CARDS -->
+
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                    <!-- Total Students -->
+
                     <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 flex items-center gap-4 transform transition-all hover:scale-[1.02] hover:shadow-md">
                         <div class="p-4 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-xl">
                             <i data-lucide="users" class="w-8 h-8"></i>
@@ -178,7 +181,7 @@
                         </div>
                     </div>
 
-                    <!-- Total Teachers -->
+
                     <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 flex items-center gap-4 transform transition-all hover:scale-[1.02] hover:shadow-md">
                         <div class="p-4 bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded-xl">
                             <i data-lucide="user-check" class="w-8 h-8"></i>
@@ -189,7 +192,7 @@
                         </div>
                     </div>
 
-                    <!-- Total Classes -->
+
                     <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 flex items-center gap-4 transform transition-all hover:scale-[1.02] hover:shadow-md">
                         <div class="p-4 bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded-xl">
                             <i data-lucide="door-open" class="w-8 h-8"></i>
@@ -200,7 +203,6 @@
                         </div>
                     </div>
 
-                    <!-- Total Subjects -->
                     <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 flex items-center gap-4 transform transition-all hover:scale-[1.02] hover:shadow-md">
                         <div class="p-4 bg-orange-50 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 rounded-xl">
                             <i data-lucide="book-open" class="w-8 h-8"></i>
@@ -212,9 +214,9 @@
                     </div>
                 </div>
 
-                <!-- BOTTOM GRID -->
+
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    <!-- Recent Activity / Table -->
+
                     <div class="lg:col-span-2 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden transition-colors">
                         <div class="px-6 py-4 border-b border-gray-100 dark:border-slate-700 flex items-center justify-between">
                             <h4 class="font-bold text-gray-800 dark:text-white">Recent Enrollments</h4>
@@ -269,7 +271,7 @@
                         </div>
                     </div>
 
-                    <!-- Side Card: Quick Actions -->
+
                     <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 p-6 transition-colors">
                         <h4 class="font-bold text-gray-800 dark:text-white mb-4">Quick Actions</h4>
                         <div class="space-y-3">
@@ -318,17 +320,16 @@
         </main>
     </div>
 
-    <!-- SCRIPT SECTION -->
+
     <script>
-        // Initialize Lucide Icons
+
         lucide.createIcons();
 
-        // --- DARK MODE LOGIC ---
         const themeToggleBtn = document.getElementById('theme-toggle');
         const darkIcon = document.getElementById('theme-toggle-dark-icon');
         const lightIcon = document.getElementById('theme-toggle-light-icon');
 
-        // Check local storage or system preference
+
         if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
             document.documentElement.classList.add('dark');
             lightIcon.classList.remove('hidden');
@@ -338,11 +339,11 @@
         }
 
         themeToggleBtn.addEventListener('click', function() {
-            // Toggle icons
+
             darkIcon.classList.toggle('hidden');
             lightIcon.classList.toggle('hidden');
 
-            // Toggle theme and save to localStorage
+
             if (document.documentElement.classList.contains('dark')) {
                 document.documentElement.classList.remove('dark');
                 localStorage.setItem('color-theme', 'light');
@@ -352,7 +353,7 @@
             }
         });
 
-        // --- SIDEBAR LOGIC ---
+
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('sidebar-overlay');
         
@@ -372,16 +373,16 @@
         const navItems = document.querySelectorAll('.nav-item');
 navItems.forEach(item => {
     item.addEventListener('click', function(e) {
-        e.preventDefault(); // keep this for JS-controlled navigation
+        e.preventDefault(); 
 
-        // Toggle active class
+  
         navItems.forEach(nav => nav.classList.remove('active'));
         this.classList.add('active');
 
-        // Mobile sidebar toggle
+
         if (window.innerWidth < 1024) toggleSidebar();
 
-        // Navigate to page inside pages/ folder
+    
         const pageName = this.getAttribute('data-page');
 
         switch(pageName) {
@@ -414,7 +415,7 @@ navItems.forEach(item => {
 
 
 
-        // --- LOGOUT LOGIC ---
+
         const logoutBtn = document.getElementById('logout-btn');
         logoutBtn.addEventListener('click', function() {
             const confirmLogout = confirm("Are you sure you want to logout?");
@@ -423,7 +424,7 @@ navItems.forEach(item => {
             }
         });
 
-        // Responsive handling
+
         window.addEventListener('resize', () => {
             if (window.innerWidth >= 1024) {
                 sidebar.classList.remove('-translate-x-full');
