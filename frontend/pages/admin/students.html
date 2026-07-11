@@ -143,10 +143,8 @@
       <div class="flex gap-2.5 flex-wrap mb-4">
         <input type="text" id="filter-search" placeholder="Search by name or ID…"
           class="form-input" style="width:auto;flex:1;min-width:200px;">
-        <select id="filter-status" class="form-input" style="width:auto;min-width:130px;">
-          <option value="">All Status</option>
-          <option value="active">Active</option>
-          <option value="inactive">Inactive</option>
+        <select id="filter-class" class="form-input" style="width:auto;min-width:150px;">
+          <option value="">All Classes</option>
         </select>
         <button class="btn btn-primary" onclick="applyFilters()">🔍 Search</button>
       </div>
@@ -157,7 +155,7 @@
           <table>
             <thead>
               <tr>
-                <th>Student</th><th>ID</th><th>Class</th><th>Gender</th><th>Status</th><th>Actions</th>
+                <th>Student</th><th>ID</th><th>Class</th><th>Gender</th><th>DOB</th><th>Actions</th>
               </tr>
             </thead>
             <tbody id="students-tbody">
@@ -190,12 +188,17 @@
         <div><label class="form-label">Date of Birth</label><input type="date" class="form-input" id="s-dob"></div>
       </div>
       <div class="grid grid-cols-2 gap-3 mb-3">
-        <div><label class="form-label">Grade</label><input class="form-input" id="s-grade" placeholder="Grade 9"></div>
-        <div><label class="form-label">Section</label><input class="form-input" id="s-section" placeholder="A"></div>
+        <div>
+          <label class="form-label">Class</label>
+          <select class="form-input" id="s-class" required>
+            <option value="">Select Class</option>
+          </select>
+        </div>
+        <div><label class="form-label">Phone</label><input class="form-input" id="s-phone" placeholder="Optional"></div>
       </div>
       <div class="grid grid-cols-2 gap-3 mb-3">
-        <div><label class="form-label">Login Email</label><input type="email" class="form-input" id="s-email" placeholder="Auto-generated"></div>
-        <div><label class="form-label">Password</label><input class="form-input" id="s-password" placeholder="Auto-generated"></div>
+        <div><label class="form-label">Parent Name</label><input class="form-input" id="s-parent" required placeholder="Parent full name"></div>
+        <div><label class="form-label">Address</label><input class="form-input" id="s-address" placeholder="Optional"></div>
       </div>
       <div class="flex justify-end gap-2.5 mt-6">
         <button type="button" class="btn btn-outline" onclick="closeModal()">Cancel</button>
@@ -211,8 +214,11 @@
     <h2 class="text-lg font-bold text-[#0F172A] mb-5">Import Students</h2>
     <div id="import-alert" class="alert-error" style="display:none;"></div>
     <form id="import-form">
-      <div class="mb-3"><label class="form-label">CSV File</label><input type="file" accept=".csv" class="form-input" id="import-file" required></div>
-      <p class="text-xs text-[#94A3B8] mb-4">Columns: first_name, last_name, gender, grade, section</p>
+      <div class="mb-3">
+        <label class="form-label">Excel/CSV File</label>
+        <input type="file" accept=".xlsx,.xls,.csv" class="form-input" id="import-file" required>
+      </div>
+      <p class="text-xs text-[#94A3B8] mb-4">Columns: email, full_name, gender, date_of_birth, class_name, school_name, parent_name, parent_email</p>
       <div class="flex justify-end gap-2.5">
         <button type="button" class="btn btn-outline" onclick="closeImportModal()">Cancel</button>
         <button type="submit" class="btn btn-primary">Upload</button>
@@ -266,11 +272,25 @@
   });
 
   /* ── Data ── */
-  let allStudents = [], editingId = null;
+  let allStudents = [], allClasses = [], editingId = null;
 
   const COLORS = ['#0F172A','#C39A48','#334155','#1E40AF','#065F46','#7C3AED'];
   function initials(name) {
     return (name||'??').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  }
+
+  async function loadClasses() {
+    try {
+      const res = await fetch('/api/admin/classes', { headers: { Authorization: 'Bearer ' + token } });
+      const data = await res.json();
+      allClasses = data.classes || data || [];
+      const sel = document.getElementById('s-class');
+      sel.innerHTML = '<option value="">Select Class</option>' +
+        allClasses.map(c => `<option value="${c.id}">${c.class_name} - ${c.section}</option>`).join('');
+      const filterSel = document.getElementById('filter-class');
+      filterSel.innerHTML = '<option value="">All Classes</option>' +
+        allClasses.map(c => `<option value="${c.id}">${c.class_name} - ${c.section}</option>`).join('');
+    } catch {}
   }
 
   async function loadStudents() {
@@ -295,6 +315,8 @@
     tb.innerHTML = list.map((s, i) => {
       const c = COLORS[i % COLORS.length];
       const ini = initials(s.name);
+      const className = s.class_name || '—';
+      const section = s.section || '';
       return `
       <tr>
         <td>
@@ -304,9 +326,9 @@
           </div>
         </td>
         <td style="font-family:monospace;color:#64748B;">${s.student_id || '—'}</td>
-        <td>${s.class_id || '—'}</td>
+        <td>${className}${section ? ' - ' + section : ''}</td>
         <td>${s.gender || '—'}</td>
-        <td><span class="badge badge-green">Active</span></td>
+        <td>${s.date_of_birth || '—'}</td>
         <td>
           <button class="btn btn-outline btn-sm" onclick="openEdit(${s.id})">✏️ Edit</button>
           <button class="btn btn-sm" style="background:#FEE2E2;color:#DC2626;border:1px solid #FECACA;margin-left:4px;" onclick="delStudent(${s.id})">🗑️ Delete</button>
@@ -318,9 +340,10 @@
   /* ── Filters ── */
   function applyFilters() {
     const q = document.getElementById('filter-search').value.toLowerCase();
-    const status = document.getElementById('filter-status').value;
+    const classId = document.getElementById('filter-class').value;
     const filtered = allStudents.filter(s =>
-      (!q || (s.name||'').toLowerCase().includes(q) || (s.student_id||'').toLowerCase().includes(q))
+      (!q || (s.name||'').toLowerCase().includes(q) || (s.student_id||'').toLowerCase().includes(q)) &&
+      (!classId || String(s.class_id) === classId)
     );
     renderStudents(filtered);
   }
@@ -343,16 +366,15 @@
     document.getElementById('s-first').value = (s.name||'').split(' ')[0];
     document.getElementById('s-last').value = (s.name||'').split(' ').slice(1).join(' ');
     document.getElementById('s-gender').value = s.gender || 'Male';
-    document.getElementById('s-dob').value = s.dob || '';
-    document.getElementById('s-grade').value = s.grade || '';
-    document.getElementById('s-section').value = s.section || '';
-    document.getElementById('s-email').value = s.email || '';
+    document.getElementById('s-dob').value = s.date_of_birth || '';
+    document.getElementById('s-class').value = s.class_id || '';
+    document.getElementById('s-phone').value = s.phone || '';
+    document.getElementById('s-address').value = s.address || '';
+    document.getElementById('s-parent').value = '';
     document.getElementById('save-btn').textContent = 'Update Student';
     document.getElementById('student-modal').classList.add('open');
   }
   function closeModal() { document.getElementById('student-modal').classList.remove('open'); }
-  function openImportModal() { document.getElementById('import-modal').classList.add('open'); }
-  function closeImportModal() { document.getElementById('import-modal').classList.remove('open'); }
 
   /* ── Save ── */
   document.getElementById('student-form').onsubmit = async (e) => {
@@ -362,15 +384,24 @@
     try {
       const fn = document.getElementById('s-first').value.trim();
       const ln = document.getElementById('s-last').value.trim();
+      const classId = document.getElementById('s-class').value;
+      const parentName = document.getElementById('s-parent').value.trim();
+
+      if (!classId) throw new Error('Please select a class');
+      if (!editingId && !parentName) throw new Error('Parent name is required for new students');
+
       const body = {
         name: fn + (ln ? ' ' + ln : ''),
         gender: document.getElementById('s-gender').value,
         date_of_birth: document.getElementById('s-dob').value || '2010-01-01',
-        grade: document.getElementById('s-grade').value,
-        section: document.getElementById('s-section').value,
-        parent_name: 'Parent',
-        class_id: 1
+        class_id: parseInt(classId),
+        phone: document.getElementById('s-phone').value || undefined,
+        address: document.getElementById('s-address').value || undefined,
       };
+      if (!editingId) {
+        body.parent_name = parentName || 'Parent';
+      }
+
       const url = editingId ? `/api/admin/students/${editingId}` : '/api/admin/students';
       const res = await fetch(url, {
         method: editingId ? 'PUT' : 'POST',
@@ -396,34 +427,50 @@
 
   /* ── Export ── */
   function exportStudents() {
-    const rows = [['Name','ID','Gender'], ...allStudents.map(s => [s.name, s.student_id, s.gender])];
+    const rows = [['Name','Student ID','Class','Gender','DOB'], ...allStudents.map(s => [s.name, s.student_id, s.class_name || '', s.gender, s.date_of_birth || ''])];
     const blob = new Blob([rows.map(r => r.join(',')).join('\n')], { type: 'text/csv' });
     const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'students.csv'; a.click();
   }
 
   /* ── Import ── */
+  function openImportModal() {
+    document.getElementById('import-form').reset();
+    document.getElementById('import-alert').style.display = 'none';
+    document.getElementById('import-modal').classList.add('open');
+  }
+  function closeImportModal() { document.getElementById('import-modal').classList.remove('open'); }
+
   document.getElementById('import-form').onsubmit = async (e) => {
     e.preventDefault();
     const file = document.getElementById('import-file').files[0];
     if (!file) return;
-    const text = await file.text();
-    const rows = text.split('\n').map(r => r.split(','));
-    let created = 0;
-    for (let i = 1; i < rows.length; i++) {
-      const row = rows[i]; if (row.length < 2) continue;
-      try {
-        await fetch('/api/admin/students', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
-          body: JSON.stringify({ name: row[0], gender: row[1]||'Male', parent_name: 'Parent', class_id: 1 })
-        });
-        created++;
-      } catch {}
+    const btn = e.target.querySelector('button[type="submit"]');
+    btn.disabled = true; btn.textContent = 'Uploading…';
+    try {
+      const fd = new FormData();
+      fd.append('excel', file);
+      const res = await fetch('/api/admin/bulk-import/students', {
+        method: 'POST',
+        headers: { Authorization: 'Bearer ' + token },
+        body: fd
+      });
+      const data = await res.json();
+      if (res.ok) {
+        const errors = data.errors && data.errors.length ? '\nErrors: ' + data.errors.join(', ') : '';
+        alert(`✅ Imported ${data.created_students} students, ${data.created_parents} parents${errors}`);
+        closeImportModal(); loadStudents();
+      } else {
+        const a = document.getElementById('import-alert');
+        a.textContent = data.error || 'Upload failed'; a.style.display = 'block';
+      }
+    } catch {
+      const a = document.getElementById('import-alert');
+      a.textContent = 'Network error'; a.style.display = 'block';
     }
-    alert(`✅ Imported ${created} students`);
-    closeImportModal(); loadStudents();
+    btn.disabled = false; btn.textContent = 'Upload';
   };
 
+  loadClasses();
   loadStudents();
 </script>
 

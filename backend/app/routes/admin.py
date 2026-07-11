@@ -243,9 +243,9 @@ def school_metrics():
         teachers_count = Teacher.query.count()
         classes_count = Class.query.count()
         
-        # Count unique parents via profiles with parent role
+        # Count parents (users with parent role)
         parent_role = Role.query.filter_by(name='parent').first()
-        parents_count = Profile.query.filter_by(parent_id=None).count() if parent_role else 0
+        parents_count = User.query.filter_by(role_id=parent_role.id).count() if parent_role else 0
         
         # Attendance rate (last 30 days)
         today = date.today()
@@ -348,17 +348,21 @@ def generate_report(report_type):
 @bp.get('/parents')
 @rbac(80)
 def get_parents():
-    profiles = Profile.query.filter(
-        Profile.parent_id.is_(None)  # Parents are profiles without a parent
-    ).all()
+    parent_role = Role.query.filter_by(name='parent').first()
+    if not parent_role:
+        return jsonify({"parents": []})
+    parent_user_ids = [u.id for u in User.query.filter_by(role_id=parent_role.id).all()]
+    profiles = Profile.query.filter(Profile.user_id.in_(parent_user_ids)).all()
     res = []
     for p in profiles:
         children_count = Student.query.filter_by(parent_id=p.id).count()
+        children = Student.query.filter_by(parent_id=p.id).all()
         res.append({
             "id": p.id,
             "name": p.full_name,
             "email": p.user.email if p.user else '',
-            "children": children_count
+            "children": children_count,
+            "student_names": [c.name for c in children]
         })
     return jsonify({"parents": res})
 
@@ -385,7 +389,9 @@ def get_subjects():
             "name": c.name,
             "code": c.code,
             "teacher": c.teacher.name if c.teacher else '',
-            "school_id": c.school_id
+            "teacher_id": c.teacher_id,
+            "school_id": c.school_id,
+            "stream": c.stream or ''
         })
     return jsonify({"subjects": res})
 
@@ -393,14 +399,29 @@ def get_subjects():
 @rbac(80)
 def add_subject():
     data = request.json
-    course = Course(
-        name=data.get('name'),
-        code=data.get('code'),
-        school_id=data.get('school_id', 1)
-    )
-    db.session.add(course)
-    db.session.commit()
-    return jsonify({"message": "Subject created"}), 201
+    name = data.get('name')
+    code = data.get('code')
+    teacher_id = data.get('teacher_id')
+    school_id = data.get('school_id', 1)
+    stream = data.get('stream')
+
+    if not all([name, code]):
+        return jsonify({"error": "Missing name or code"}), 400
+
+    try:
+        course = Course(
+            name=name,
+            code=code,
+            teacher_id=teacher_id if teacher_id else None,
+            school_id=school_id,
+            stream=stream if stream in ('natural', 'social') else None
+        )
+        db.session.add(course)
+        db.session.commit()
+        return jsonify({"message": "Subject created"}), 201
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
 
 @bp.delete('/subjects/<int:id>')
 @rbac(80)
@@ -529,12 +550,83 @@ def get_grades():
             "id": g.id,
             "student_id": g.student_id,
             "student_name": g.student.name if g.student else '',
-            "subject": g.subject if hasattr(g, 'subject') else 'N/A',
+            "course_id": g.course_id,
+            "course_name": g.course.name if g.course else '',
             "exam_type": g.exam_type,
             "score": g.score,
             "total_marks": g.total_marks
         })
     return jsonify({"grades": res})
+
+@bp.post('/grades')
+@rbac(80)
+def add_grade():
+    """
+    Add a grade for a student
+    ---
+    tags:
+      - Grades
+    summary: Create a new grade record
+    security:
+      - Bearer: []
+    parameters:
+      - in: body
+        name: body
+        required: true
+        schema:
+          type: object
+          properties:
+            student_id:
+              type: integer
+            course_id:
+              type: integer
+            exam_type:
+              type: string
+              enum: [Quiz, Mid, Final]
+            score:
+              type: number
+            total_marks:
+              type: number
+    responses:
+      201:
+        description: Grade created
+    """
+    data = request.json
+    student_id = data.get('student_id')
+    course_id = data.get('course_id')
+    exam_type = data.get('exam_type')
+    score = data.get('score')
+    total_marks = data.get('total_marks')
+
+    if not all([student_id, course_id, exam_type, score is not None, total_marks]):
+        return jsonify({"error": "Missing required fields"}), 400
+
+    if exam_type not in ('Quiz', 'Mid', 'Final'):
+        return jsonify({"error": "Invalid exam type. Must be Quiz, Mid, or Final"}), 400
+
+    try:
+        grade = Grade(
+            student_id=student_id,
+            course_id=course_id,
+            exam_type=exam_type,
+            score=float(score),
+            total_marks=float(total_marks)
+        )
+        db.session.add(grade)
+        db.session.commit()
+        return jsonify({"message": "Grade created successfully"}), 201
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
+
+@bp.delete('/grades/<int:id>')
+@rbac(80)
+def delete_grade(id):
+    g = Grade.query.get(id)
+    if g:
+        db.session.delete(g)
+        db.session.commit()
+    return jsonify({"message": "Deleted"}), 200
 
 @bp.post('/cascade-register')
 @rbac(80)
@@ -635,8 +727,15 @@ def get_students():
             "id": s.id,
             "name": s.name,
             "student_id": s.student_id,
-            "class_id": s.class_.class_name if s.class_ else s.class_id,
-            "gender": s.gender
+            "class_id": s.class_id,
+            "class_name": s.class_.class_name if s.class_ else '',
+            "section": s.class_.section if s.class_ else '',
+            "gender": s.gender,
+            "date_of_birth": str(s.date_of_birth) if s.date_of_birth else '',
+            "phone": s.phone or '',
+            "address": s.address or '',
+            "enrollment_date": str(s.enrollment_date) if s.enrollment_date else '',
+            "parent_id": s.parent_id
         })
     return jsonify({"students": res})
 
@@ -697,11 +796,11 @@ def add_student():
 
     try:
         current_year = datetime.utcnow().year
-        
+
         cls = Class.query.get(class_id)
         if not cls:
             return jsonify({"error": "Invalid class selected"}), 400
-        
+
         class_name = cls.class_name
         grade_str = ''.join(filter(str.isdigit, class_name))
         grade_val = grade_str if grade_str else '1'
@@ -710,6 +809,14 @@ def add_student():
         count = Student.query.join(Class).filter(Class.class_name == class_name).count()
         new_num = count + 1
         student_id = f"{new_num:04d}/{grade_val}"
+
+        # Get or create default school
+        school = School.query.first()
+        if not school:
+            school = School(name='Default School', location='')
+            db.session.add(school)
+            db.session.flush()
+        sid = school.id
 
         # Parent User & Profile
         parent_role = Role.query.filter_by(name='parent').first()
@@ -722,11 +829,11 @@ def add_student():
         parent_username = f"{parent_first}_{int(time.time())}@school.com"
         parent_pwd = hash_password(f"{parent_first}{current_year}")
 
-        parent_user = User(email=parent_username, password_hash=parent_pwd, role_id=parent_role.id, must_change_password=True)
+        parent_user = User(email=parent_username, password_hash=parent_pwd, role_id=parent_role.id, school_id=sid, must_change_password=True)
         db.session.add(parent_user)
         db.session.flush()
 
-        parent_profile = Profile(user_id=parent_user.id, full_name=parent_name, school_id=1)
+        parent_profile = Profile(user_id=parent_user.id, full_name=parent_name, school_id=sid)
         db.session.add(parent_profile)
         db.session.flush()
 
@@ -738,14 +845,14 @@ def add_student():
             db.session.flush()
 
         student_first = name.split()[0].lower()
-        student_username = f"{name.replace(' ', '').lower()}@school.com"
+        student_username = f"{name.replace(' ', '').lower()}_{int(time.time())}@school.com"
         student_pwd = hash_password(f"{student_first}123")
 
-        student_user = User(email=student_username, password_hash=student_pwd, role_id=student_role.id, must_change_password=True)
+        student_user = User(email=student_username, password_hash=student_pwd, role_id=student_role.id, school_id=sid, must_change_password=True)
         db.session.add(student_user)
         db.session.flush()
 
-        student_profile = Profile(user_id=student_user.id, full_name=name, school_id=1, parent_id=parent_profile.id)
+        student_profile = Profile(user_id=student_user.id, full_name=name, school_id=sid, parent_id=parent_profile.id)
         db.session.add(student_profile)
         db.session.flush()
 
@@ -834,6 +941,14 @@ def add_teacher():
 
     try:
         current_year = datetime.utcnow().year
+
+        # Get or create default school
+        school = School.query.first()
+        if not school:
+            school = School(name='Default School', location='')
+            db.session.add(school)
+            db.session.flush()
+        sid = school.id
         
         teacher_role = Role.query.filter_by(name='teacher').first()
         if not teacher_role:
@@ -842,14 +957,14 @@ def add_teacher():
             db.session.flush()
         
         first_name = name.split()[0].lower()
-        email = f"{name.replace(' ', '').lower()}@school.com"
+        email = f"{name.replace(' ', '').lower()}_{int(time.time())}@school.com"
         teacher_pwd = hash_password(f"{first_name}123")
 
-        teacher_user = User(email=email, password_hash=teacher_pwd, role_id=teacher_role.id, must_change_password=True)
+        teacher_user = User(email=email, password_hash=teacher_pwd, role_id=teacher_role.id, school_id=sid, must_change_password=True)
         db.session.add(teacher_user)
         db.session.flush()
 
-        teacher_profile = Profile(user_id=teacher_user.id, full_name=name, school_id=1)
+        teacher_profile = Profile(user_id=teacher_user.id, full_name=name, school_id=sid)
         db.session.add(teacher_profile)
         db.session.flush()
 
@@ -999,6 +1114,13 @@ def add_parent():
     if not name:
         return jsonify({"error": "Missing name"}), 400
     try:
+        school = School.query.first()
+        if not school:
+            school = School(name='Default School', location='')
+            db.session.add(school)
+            db.session.flush()
+        sid = school.id
+
         parent_role = Role.query.filter_by(name='parent').first()
         if not parent_role:
             parent_role = Role(name='parent', level=10)
@@ -1007,11 +1129,11 @@ def add_parent():
 
         p_email = email or f"{name.replace(' ','').lower()}_{int(time.time())}@school.com"
         pwd = hash_password(f"{name.split()[0].lower()}2026")
-        user = User(email=p_email, password_hash=pwd, role_id=parent_role.id, must_change_password=True)
+        user = User(email=p_email, password_hash=pwd, role_id=parent_role.id, school_id=sid, must_change_password=True)
         db.session.add(user)
         db.session.flush()
 
-        profile = Profile(user_id=user.id, full_name=name, school_id=1)
+        profile = Profile(user_id=user.id, full_name=name, school_id=sid)
         db.session.add(profile)
         db.session.commit()
         return jsonify({"message": "Parent created successfully"}), 201
@@ -1055,6 +1177,7 @@ def edit_subject(id):
     if 'name' in data: c.name = data['name']
     if 'code' in data: c.code = data['code']
     if 'teacher_id' in data: c.teacher_id = data['teacher_id']
+    if 'stream' in data: c.stream = data['stream'] if data['stream'] in ('natural', 'social') else None
     try:
         db.session.commit()
         return jsonify({"message": "Subject updated"}), 200

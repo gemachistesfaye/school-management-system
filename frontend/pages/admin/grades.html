@@ -4,13 +4,57 @@
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Grades | EduFlow Admin</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../../assets/css/theme.css">
-  <link rel="stylesheet" href="../../assets/css/admin-theme.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            navy: '#0F172A',
+            gold: '#E8CE8A',
+            'gold-dark': '#C39A48',
+          },
+          fontFamily: { sans: ['Inter', 'sans-serif'] }
+        }
+      }
+    };
+  </script>
   <style>
-    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:100;align-items:center;justify-content:center;}
-    .modal-overlay.open{display:flex;}
-    .modal{background:#fff;border-radius:14px;padding:28px;width:100%;max-width:480px;box-shadow:0 20px 60px rgba(0,0,0,.15);}
-    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+    body { font-family: 'Inter', sans-serif; }
+    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:200; align-items:center; justify-content:center; }
+    .modal-overlay.open { display:flex; }
+    .nav-item { display:flex; align-items:center; gap:12px; padding:10px 16px; border-radius:10px; color:#94A3B8; font-size:13.5px; font-weight:500; text-decoration:none; transition:all 0.2s ease; margin: 2px 8px; }
+    .nav-item:hover { background:rgba(255,255,255,0.06); color:#F8FAFC; }
+    .nav-item.active { background:rgba(255,255,255,0.1); color:#F8FAFC; font-weight:600; border-left: 3px solid #C39A48; border-radius: 4px 10px 10px 4px; }
+    .nav-item i { width: 16px; text-align: center; font-size: 14px; opacity: 0.8; transition:0.2s; }
+    .nav-item:hover i { opacity: 1; color: #fff; }
+    .nav-item.active i { opacity: 1; color: #E8CE8A; }
+    .sidebar-nav::-webkit-scrollbar { width: 4px; }
+    .sidebar-nav::-webkit-scrollbar-track { background: transparent; }
+    .sidebar-nav::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+    .form-input { width:100%; border:1.5px solid #E2E8F0; border-radius:8px; padding:8px 12px; font-size:14px; outline:none; transition:.15s; font-family:'Inter',sans-serif; }
+    .form-input:focus { border-color:#C39A48; box-shadow:0 0 0 3px rgba(195,154,72,.15); }
+    .form-label { display:block; font-size:12px; font-weight:600; color:#475569; margin-bottom:5px; }
+    .btn { border-radius:8px; font-weight:600; font-size:13.5px; padding:8px 16px; cursor:pointer; border:none; transition:.15s; display:inline-flex; align-items:center; gap:6px; }
+    .btn-primary { background:#0F172A; color:#fff; }
+    .btn-primary:hover { background:#1E293B; }
+    .btn-outline { background:#fff; color:#0F172A; border:1.5px solid #CBD5E1; }
+    .btn-outline:hover { background:#F8FAFC; }
+    .btn-sm { padding:5px 10px; font-size:12px; border-radius:6px; }
+    .badge { display:inline-flex; align-items:center; padding:2px 10px; border-radius:999px; font-size:12px; font-weight:600; }
+    .badge-green { background:#DCFCE7; color:#15803D; }
+    .badge-red { background:#FEE2E2; color:#DC2626; }
+    .badge-amber { background:#FEF3C7; color:#92400E; }
+    .badge-blue { background:#DBEAFE; color:#1E40AF; }
+    .badge-gray { background:#F1F5F9; color:#475569; }
+    table { width:100%; border-collapse:collapse; }
+    th { background:#F8FAFC; color:#475569; font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; padding:11px 14px; text-align:left; border-bottom:2px solid #E2E8F0; }
+    td { padding:11px 14px; color:#334155; font-size:14px; border-bottom:1px solid #F1F5F9; }
+    tr:hover td { background:#FAFBFD; }
+    .alert-error { background:#FEE2E2; color:#DC2626; border:1px solid #FECACA; border-radius:8px; padding:10px 14px; font-size:13px; margin-bottom:14px; }
+    .alert-success { background:#DCFCE7; color:#15803D; border:1px solid #BBF7D0; border-radius:8px; padding:10px 14px; font-size:13px; margin-bottom:14px; }
+    .sidebar-section-label { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.15em; color:#64748B; padding:20px 24px 8px; }
   </style>
 
 <style class="premium-sidebar-css">
@@ -21,17 +65,14 @@
   .nav-item i { width: 16px !important; text-align: center !important; font-size: 14px !important; opacity: 0.8 !important; transition:0.2s !important; color: inherit !important; }
   .nav-item:hover i { opacity: 1 !important; color: #fff !important; }
   .nav-item.active i { opacity: 1 !important; color: #E8CE8A !important; }
-  .sidebar-nav::-webkit-scrollbar { width: 4px; }
-  .sidebar-nav::-webkit-scrollbar-track { background: transparent; }
-  .sidebar-nav::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
   .sidebar-section-label { font-size:10px !important; font-weight:700 !important; text-transform:uppercase !important; letter-spacing:0.15em !important; color:#64748B !important; padding:20px 24px 8px !important; font-family: 'Inter', sans-serif !important; }
 </style>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
 </head>
-<body>
-<div class="app-shell">
-  <aside class="sidebar">
+<body class="bg-[#F1F5F9]">
+<div class="flex min-h-screen">
 
+  <!-- SIDEBAR -->
+  <aside class="fixed left-0 top-0 bottom-0 w-60 flex flex-col z-40 overflow-hidden" style="background:#0F172A;">
     <div style="display: flex; align-items: center; gap: 12px; padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.05);">
       <div style="width: 36px; height: 36px; background: linear-gradient(135deg,#f2d480,#c39a48); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; color: #0F172A; flex-shrink: 0;">🎓</div>
       <div>
@@ -63,35 +104,48 @@
     <div style="padding: 16px; border-top: 1px solid rgba(255,255,255,0.05); background: rgba(0,0,0,0.15);">
       <button id="logout-btn" style="display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 10px; border-radius: 8px; background: transparent !important; border: none !important; color: #94A3B8 !important; font-size: 13.5px; font-weight: 600; cursor: pointer; transition: 0.2s;" onmouseover="this.style.color='#fff'; this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.color='#94A3B8'; this.style.background='transparent'"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</button>
     </div>
-</aside>
+  </aside>
 
-  <div class="main-content">
-    <header class="top-header">
-      <div class="header-search">🔍 <input placeholder="Search grades…" type="text" id="search-input"></div>
-      <div class="header-right">
-        <div class="header-user"><div class="header-avatar">A</div><span>Admin</span></div>
+  <!-- MAIN -->
+  <div class="flex-1 ml-60 flex flex-col min-h-screen">
+    <header class="bg-white border-b border-[#E2E8F0] h-14 flex items-center px-6 gap-4 sticky top-0 z-30">
+      <div class="flex-1 max-w-sm flex items-center bg-[#F1F5F9] border border-[#E2E8F0] rounded-lg px-3 py-1.5 gap-2 text-[#94A3B8] text-sm">
+        🔍 <input placeholder="Search grades…" type="text" id="search-input" class="bg-transparent border-none outline-none flex-1 text-[#0F172A] text-sm">
+      </div>
+      <div class="ml-auto flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-[#E2E8F0] cursor-pointer text-sm font-medium text-[#0F172A]">
+        <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white" style="background:linear-gradient(135deg,#C39A48,#E8CE8A);">A</div>
+        <span>Admin</span>
       </div>
     </header>
 
-    <div class="page-body">
-      <div class="page-title-row">
-        <div><div class="page-title">Grades</div><div class="page-subtitle">View and manage student grades</div></div>
+    <div class="flex-1 p-7">
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <h1 class="text-[22px] font-bold text-[#0F172A]">Grades</h1>
+          <p class="text-sm text-[#94A3B8] mt-0.5">View and manage student grades</p>
+        </div>
+        <button class="btn btn-primary" onclick="openModal()">+ Add Grade</button>
       </div>
 
       <!-- Filters -->
-      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
-        <select class="form-select" style="width:auto;" id="filter-exam">
+      <div class="flex gap-2.5 flex-wrap mb-4">
+        <select class="form-input" style="width:auto;min-width:150px;" id="filter-exam">
           <option value="">All Exam Types</option>
           <option>Quiz</option><option>Mid</option><option>Final</option>
         </select>
       </div>
 
-      <div class="card">
-        <div style="overflow-x:auto;">
-          <table class="data-table">
-            <thead><tr><th>Student</th><th>Course</th><th>Exam Type</th><th>Score</th><th>Total</th><th>%</th><th>Grade</th></tr></thead>
+      <!-- Table -->
+      <div class="bg-white rounded-xl border border-[#E2E8F0] overflow-hidden shadow-sm">
+        <div class="overflow-x-auto">
+          <table>
+            <thead>
+              <tr>
+                <th>Student</th><th>Course</th><th>Exam Type</th><th>Score</th><th>Total</th><th>%</th><th>Grade</th><th>Actions</th>
+              </tr>
+            </thead>
             <tbody id="grades-tbody">
-              <tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text-muted);">Loading grades…</td></tr>
+              <tr><td colspan="8" class="text-center py-10 text-[#94A3B8]">Loading grades…</td></tr>
             </tbody>
           </table>
         </div>
@@ -100,39 +154,88 @@
   </div>
 </div>
 
+<!-- ===== ADD GRADE MODAL ===== -->
+<div class="modal-overlay" id="grade-modal">
+  <div class="bg-white rounded-2xl p-8 w-full shadow-2xl" style="max-width:520px;">
+    <h2 class="text-lg font-bold text-[#0F172A] mb-5">Add Grade</h2>
+    <div id="modal-alert" class="alert-error" style="display:none;"></div>
+    <form id="grade-form">
+      <div class="mb-3">
+        <label class="form-label">Student</label>
+        <select class="form-input" id="g-student" required>
+          <option value="">Select Student</option>
+        </select>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Course / Subject</label>
+        <select class="form-input" id="g-course" required>
+          <option value="">Select Course</option>
+        </select>
+      </div>
+      <div class="grid grid-cols-2 gap-3 mb-3">
+        <div>
+          <label class="form-label">Exam Type</label>
+          <select class="form-input" id="g-exam" required>
+            <option value="Quiz">Quiz</option>
+            <option value="Mid">Mid</option>
+            <option value="Final">Final</option>
+          </select>
+        </div>
+        <div></div>
+      </div>
+      <div class="grid grid-cols-2 gap-3 mb-3">
+        <div>
+          <label class="form-label">Score</label>
+          <input type="number" step="0.5" min="0" class="form-input" id="g-score" required placeholder="e.g. 85">
+        </div>
+        <div>
+          <label class="form-label">Total Marks</label>
+          <input type="number" step="0.5" min="1" class="form-input" id="g-total" required placeholder="e.g. 100">
+        </div>
+      </div>
+      <div class="flex justify-end gap-2.5 mt-6">
+        <button type="button" class="btn btn-outline" onclick="closeModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary" id="save-btn">Save Grade</button>
+      </div>
+    </form>
+  </div>
+</div>
 
-
-<!-- Confirm Modal -->
-<div class="modal-overlay" id="confirm-modal" style="z-index: 1000;">
-  <div class="modal" style="max-width: 400px; text-align: center; padding: 32px;">
-    <h2 style="font-size: 18px; margin-bottom: 12px;" id="confirm-title">Are you sure?</h2>
-    <p style="color: #6b7280; margin-bottom: 24px;" id="confirm-msg">This action cannot be undone.</p>
-    <div style="display: flex; gap: 12px; justify-content: center;">
-      <button class="btn btn-outline" onclick="closeConfirm()" style="flex: 1;">Cancel</button>
-      <button class="btn btn-primary" id="confirm-btn" style="flex: 1; background: #ef4444; color: white; border-color: #ef4444;">Confirm</button>
+<!-- ===== CONFIRM MODAL ===== -->
+<div class="modal-overlay" id="confirm-modal" style="z-index:300;">
+  <div class="bg-white rounded-2xl p-8 w-full shadow-2xl text-center" style="max-width:400px;">
+    <div class="text-4xl mb-4">⚠️</div>
+    <h2 class="text-lg font-bold text-[#0F172A] mb-2" id="confirm-title">Are you sure?</h2>
+    <p class="text-[#6b7280] mb-6" id="confirm-msg">This action cannot be undone.</p>
+    <div class="flex gap-3">
+      <button class="btn btn-outline flex-1" onclick="closeConfirm()">Cancel</button>
+      <button class="btn flex-1" id="confirm-btn" style="background:#EF4444;color:#fff;">Confirm</button>
     </div>
   </div>
 </div>
 
 <script>
+  const token = localStorage.getItem('access_token');
+  if (!token) window.location.href = '../../login.html';
 
-  let confirmCallback = null;
-  function openConfirm(title, msg, callback) {
+  let confirmCb = null;
+  function openConfirm(title, msg, cb) {
     document.getElementById('confirm-title').textContent = title;
     document.getElementById('confirm-msg').textContent = msg;
-    confirmCallback = callback;
+    confirmCb = cb;
     document.getElementById('confirm-modal').classList.add('open');
   }
   function closeConfirm() { document.getElementById('confirm-modal').classList.remove('open'); }
-  document.getElementById('confirm-btn').onclick = () => { if(confirmCallback) confirmCallback(); closeConfirm(); };
+  document.getElementById('confirm-btn').onclick = () => { if (confirmCb) confirmCb(); closeConfirm(); };
 
-  const token = localStorage.getItem('access_token');
-  if (!token) window.location.href = '../../login.html';
   document.getElementById('logout-btn').onclick = () => {
-    openConfirm("Log Out", "Are you sure you want to log out of your session?", () => {
-      localStorage.removeItem('access_token'); window.location.href = '../../login.html';
+    openConfirm('Log Out', 'Are you sure you want to log out?', () => {
+      localStorage.removeItem('access_token');
+      window.location.href = '../../login.html';
     });
   };
+
+  let allGrades = [], allStudents = [], allCourses = [];
 
   function letterGrade(pct) {
     if (pct>=90) return '<span class="badge badge-green">A+</span>';
@@ -143,44 +246,122 @@
     return '<span class="badge badge-red">F</span>';
   }
 
-  let all = [];
-  async function load() {
+  async function loadStudents() {
+    try {
+      const res = await fetch('/api/admin/students', { headers: { Authorization: 'Bearer ' + token } });
+      const data = await res.json();
+      allStudents = data.students || data || [];
+      const sel = document.getElementById('g-student');
+      sel.innerHTML = '<option value="">Select Student</option>' +
+        allStudents.map(s => `<option value="${s.id}">${s.name} (${s.student_id})</option>`).join('');
+    } catch {}
+  }
+
+  async function loadCourses() {
+    try {
+      const res = await fetch('/api/admin/subjects', { headers: { Authorization: 'Bearer ' + token } });
+      const data = await res.json();
+      allCourses = data.subjects || data || [];
+      const sel = document.getElementById('g-course');
+      sel.innerHTML = '<option value="">Select Course</option>' +
+        allCourses.map(c => `<option value="${c.id}">${c.name} (${c.code})</option>`).join('');
+    } catch {}
+  }
+
+  async function loadGrades() {
     try {
       const res = await fetch('/api/admin/grades', { headers:{ Authorization:'Bearer '+token } });
       const data = await res.json();
-      all = data.grades || data || [];
-      render(all);
-    } catch { document.getElementById('grades-tbody').innerHTML='<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text-muted);">Could not load grades.</td></tr>'; }
+      allGrades = data.grades || data || [];
+      render(allGrades);
+    } catch {
+      document.getElementById('grades-tbody').innerHTML='<tr><td colspan="8" class="text-center py-10 text-red-500">Could not load grades.</td></tr>';
+    }
   }
 
   function render(list) {
     const tb = document.getElementById('grades-tbody');
-    if (!list.length) { tb.innerHTML='<tr><td colspan="7" style="text-align:center;padding:40px;">No grades found.</td></tr>'; return; }
+    if (!list.length) {
+      tb.innerHTML='<tr><td colspan="8" class="text-center py-12 text-[#94A3B8]">No grades found.</td></tr>';
+      return;
+    }
     tb.innerHTML = list.map(g => {
       const pct = Math.round(g.score / g.total_marks * 100);
       return `<tr>
-        <td style="font-weight:500;">Student #${g.student_id}</td>
-        <td>Course #${g.course_id}</td>
+        <td class="font-medium text-[#0F172A]">${g.student_name || 'Student #' + g.student_id}</td>
+        <td>${g.course_name || 'Course #' + g.course_id}</td>
         <td><span class="badge badge-gray">${g.exam_type}</span></td>
         <td>${g.score}</td>
         <td>${g.total_marks}</td>
         <td>${pct}%</td>
         <td>${letterGrade(pct)}</td>
+        <td>
+          <button class="btn btn-sm" style="background:#FEE2E2;color:#DC2626;border:1px solid #FECACA;" onclick="delGrade(${g.id})">🗑️ Delete</button>
+        </td>
       </tr>`;
     }).join('');
   }
 
   document.getElementById('search-input').oninput = e => {
     const q = e.target.value.toLowerCase();
-    document.querySelectorAll('#grades-tbody tr').forEach(r => r.style.display = r.textContent.toLowerCase().includes(q) ? '' : 'none');
+    const filtered = allGrades.filter(g =>
+      (g.student_name||'').toLowerCase().includes(q) ||
+      (g.course_name||'').toLowerCase().includes(q) ||
+      (g.exam_type||'').toLowerCase().includes(q)
+    );
+    render(filtered);
   };
   document.getElementById('filter-exam').onchange = e => {
     const v = e.target.value;
-    render(v ? all.filter(g=>g.exam_type===v) : all);
+    render(v ? allGrades.filter(g=>g.exam_type===v) : allGrades);
   };
 
+  function openModal() {
+    document.getElementById('grade-form').reset();
+    document.getElementById('modal-alert').style.display = 'none';
+    document.getElementById('grade-modal').classList.add('open');
+  }
+  function closeModal() { document.getElementById('grade-modal').classList.remove('open'); }
 
-  load();
+  document.getElementById('grade-form').onsubmit = async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('save-btn');
+    btn.disabled = true; btn.textContent = 'Saving…';
+    try {
+      const body = {
+        student_id: parseInt(document.getElementById('g-student').value),
+        course_id: parseInt(document.getElementById('g-course').value),
+        exam_type: document.getElementById('g-exam').value,
+        score: parseFloat(document.getElementById('g-score').value),
+        total_marks: parseFloat(document.getElementById('g-total').value)
+      };
+      if (!body.student_id || !body.course_id) throw new Error('Please select student and course');
+      if (body.score > body.total_marks) throw new Error('Score cannot exceed total marks');
+
+      const res = await fetch('/api/admin/grades', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+        body: JSON.stringify(body)
+      });
+      if (!res.ok) throw new Error((await res.json()).error || 'Error saving');
+      closeModal(); loadGrades();
+    } catch (err) {
+      const a = document.getElementById('modal-alert');
+      a.textContent = err.message; a.style.display = 'block';
+    }
+    btn.disabled = false; btn.textContent = 'Save Grade';
+  };
+
+  function delGrade(id) {
+    openConfirm('Delete Grade', 'This will permanently remove this grade record.', async () => {
+      await fetch('/api/admin/grades/' + id, { method: 'DELETE', headers: { Authorization: 'Bearer ' + token } });
+      loadGrades();
+    });
+  }
+
+  loadStudents();
+  loadCourses();
+  loadGrades();
 </script>
 
 <script>

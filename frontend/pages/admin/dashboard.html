@@ -191,7 +191,7 @@
     });
   };
 
-  // Load LIVE data from backend - NO hardcoded values
+  // Load LIVE data from backend - auto-refreshes every 30s
   async function loadDashboard() {
     try {
       const res = await fetch('/api/admin/school-metrics', {
@@ -219,7 +219,6 @@
       document.getElementById('metric-total-fees').textContent = data.total_fees || '$0';
 
       // Welcome text
-      const user = localStorage.getItem('user_role') || 'Admin';
       document.getElementById('welcome-text').textContent = `${data.students || 0} students enrolled across ${data.classes || 0} classes.`;
       document.getElementById('last-updated').textContent = `Updated ${new Date().toLocaleTimeString()}`;
       
@@ -231,6 +230,7 @@
     }
   }
   loadDashboard();
+  setInterval(loadDashboard, 30000);
 
   // Charts - using sample enrollment data (real data would come from analytics endpoint)
   Chart.defaults.color = '#6b7280';
