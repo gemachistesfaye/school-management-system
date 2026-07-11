@@ -9,3 +9,5 @@ mysql-connector-python
 pandas
 reportlab
 Flask-CORS
+psycopg2-binary
+flasgger

@@ -1,0 +1,42 @@
+/* admin-tailwind.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Brand-specific button styles */
+.btn-primary {
+  @apply bg-admin-navy text-white hover:bg-admin-navy/90 font-medium py-2 px-4 rounded-btn;
+}
+.btn-outline {
+  @apply border border-admin-navy text-admin-navy hover:bg-admin-bg font-medium py-2 px-4 rounded-btn;
+}
+
+/* Sidebar & navigation */
+.sidebar {
+  @apply bg-admin-navy text-admin-gold w-60 flex flex-col overflow-hidden;
+}
+.sidebar .nav-item {
+  @apply flex items-center gap-2.5 px-4 py-2.5 text-admin-gold font-semibold text-sm no-underline transition hover:bg-white/5 hover:text-white;
+}
+.sidebar .nav-item.active {
+  @apply bg-gradient-to-r from-admin-gold-dark via-admin-gold to-admin-gold-dark text-white font-bold shadow-lg;
+}
+
+/* Modal */
+.modal-overlay {
+  @apply fixed inset-0 bg-black/35 flex items-center justify-center hidden;
+}
+.modal-overlay.open {
+  @apply flex;
+}
+.modal {
+  @apply bg-white rounded-xl p-8 max-w-lg w-full shadow-xl;
+}
+
+/* Badges */
+.badge-success { @apply bg-green-100 text-green-800; }
+.badge-gray { @apply bg-gray-200 text-gray-800; }
+
+/* Misc utility classes */
+.skeleton { @apply bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] animate-[shimmer_1.5s_infinite] rounded-md; }
+@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }

@@ -1,0 +1,23 @@
+<!-- _admin-head.html: shared head for admin pages -->
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EduFlow Admin - {{PAGE_TITLE}}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'admin-navy': '#0F172A',
+            'admin-gold': '#E8CE8A',
+            'admin-gold-dark': '#C39A48',
+            'admin-bg': '#F1F5F9',
+          },
+        },
+      },
+    };
+  </script>
+  <link rel="stylesheet" href="../../assets/css/admin-tailwind.css">
+</head>

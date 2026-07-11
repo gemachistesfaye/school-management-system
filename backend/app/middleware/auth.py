@@ -13,7 +13,7 @@ ROLE_LEVEL = {
 def register_auth_middleware(app):
     @app.before_request
     def load_user():
-        exempt = ["/api/auth/login", "/api/health"]
+        exempt = ["/api/auth/login", "/api/health", "/apidocs", "/apispec_1", "/flasgger_static"]
         if any(request.path.startswith(p) for p in exempt):
             return
 

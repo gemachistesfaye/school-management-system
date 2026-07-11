@@ -5,7 +5,8 @@ All tables are linked via foreign keys where appropriate.
 """
 
 from .database import db
-from datetime import datetime
+from sqlalchemy.orm import validates
+from datetime import datetime, date
 
 # ---------------------------------------------------------------------------
 # Core authentication models
@@ -100,11 +101,17 @@ class Student(db.Model):
     class_id = db.Column(db.Integer, db.ForeignKey('classes.id'), nullable=False)
     phone = db.Column(db.String(20))
     address = db.Column(db.String(255))
-    enrollment_date = db.Column(db.Date, default=datetime.utcnow)
+    enrollment_date = db.Column(db.Date, default=date.today)
     parent_id = db.Column(db.Integer, db.ForeignKey('profiles.id'))
 
     class_ = db.relationship('Class')
     parent = db.relationship('Profile', foreign_keys=[parent_id])
+
+    @validates('date_of_birth', 'enrollment_date')
+    def _convert_date(self, key, value):
+        if isinstance(value, str):
+            return datetime.strptime(value, '%Y-%m-%d').date()
+        return value
 
     def __repr__(self):
         return f"<Student {self.student_id} {self.name}>"
@@ -116,7 +123,13 @@ class Teacher(db.Model):
     subject = db.Column(db.String(80), nullable=False)
     phone = db.Column(db.String(20))
     email = db.Column(db.String(120), unique=True)
-    hire_date = db.Column(db.Date, default=datetime.utcnow)
+    hire_date = db.Column(db.Date, default=date.today)
+
+    @validates('hire_date')
+    def _convert_hire_date(self, key, value):
+        if isinstance(value, str):
+            return datetime.strptime(value, '%Y-%m-%d').date()
+        return value
 
     def __repr__(self):
         return f"<Teacher {self.name} ({self.subject})>"
@@ -129,6 +142,12 @@ class Attendance(db.Model):
     status = db.Column(db.Enum('Present', 'Absent', 'Late', name='attendance_status_enum'), nullable=False)
 
     student = db.relationship('Student')
+
+    @validates('date')
+    def _convert_date(self, key, value):
+        if isinstance(value, str):
+            return datetime.strptime(value, '%Y-%m-%d').date()
+        return value
 
     def __repr__(self):
         return f"<Attendance {self.student_id} {self.date} {self.status}>"
@@ -147,18 +166,6 @@ class Grade(db.Model):
 
     def __repr__(self):
         return f"<Grade student={self.student_id} course={self.course_id} {self.exam_type}>"
-    __tablename__ = "grades"
-    id = db.Column(db.Integer, primary_key=True)
-    student_id = db.Column(db.Integer, db.ForeignKey('students.id'), nullable=False)
-    subject = db.Column(db.String(80), nullable=False)
-    exam_type = db.Column(db.Enum('Quiz', 'Mid', 'Final', name='exam_type_enum'), nullable=False)
-    score = db.Column(db.Float, nullable=False)
-    total_marks = db.Column(db.Float, nullable=False)
-
-    student = db.relationship('Student')
-
-    def __repr__(self):
-        return f"<Grade {self.student_id} {self.subject} {self.exam_type}>"
 
 class Fee(db.Model):
     __tablename__ = "fees"
@@ -171,6 +178,12 @@ class Fee(db.Model):
 
     student = db.relationship('Student')
 
+    @validates('due_date')
+    def _convert_due_date(self, key, value):
+        if isinstance(value, str):
+            return datetime.strptime(value, '%Y-%m-%d').date()
+        return value
+
     def __repr__(self):
         return f"<Fee {self.student_id} {self.amount} {self.status}>"
 
@@ -180,6 +193,12 @@ class Exam(db.Model):
     exam_name = db.Column(db.String(120), nullable=False)
     exam_date = db.Column(db.Date, nullable=False)
     academic_year = db.Column(db.String(9), nullable=False)
+
+    @validates('exam_date')
+    def _convert_exam_date(self, key, value):
+        if isinstance(value, str):
+            return datetime.strptime(value, '%Y-%m-%d').date()
+        return value
 
     def __repr__(self):
         return f"<Exam {self.exam_name} ({self.academic_year})>"

@@ -6,6 +6,46 @@ bp = Blueprint('auth', __name__)
 
 @bp.post('/login')
 def login():
+    """
+    User Login
+    ---
+    tags:
+      - Authentication
+    summary: Authenticate user and get access token
+    parameters:
+      - in: body
+        name: body
+        required: true
+        schema:
+          type: object
+          required:
+            - email
+            - password
+          properties:
+            email:
+              type: string
+              example: admin@school.com
+            password:
+              type: string
+              example: StrongPass!23
+            portal:
+              type: string
+              example: staff
+    responses:
+      200:
+        description: Successful login
+        schema:
+          type: object
+          properties:
+            access_token:
+              type: string
+            role:
+              type: string
+      401:
+        description: Invalid credentials
+      403:
+        description: Access denied for portal
+    """
     data = request.json
     email = data.get('email')
     pwd = data.get('password')

@@ -1,0 +1,49 @@
+// vite.config.js
+import { defineConfig } from "file:///E:/GitHub%20Repo/school-management-system/frontend/node_modules/vite/dist/node/index.js";
+import { resolve } from "path";
+import react from "file:///E:/GitHub%20Repo/school-management-system/frontend/node_modules/@vitejs/plugin-react/dist/index.js";
+var __vite_injected_original_dirname = "E:\\GitHub Repo\\school-management-system\\frontend";
+var vite_config_default = defineConfig({
+  plugins: [react()],
+  root: ".",
+  base: "/",
+  server: {
+    proxy: {
+      "/api": {
+        target: "http://localhost:5000",
+        changeOrigin: true,
+        secure: false
+      }
+    }
+  },
+  build: {
+    outDir: "../dist",
+    emptyOutDir: true,
+    rollupOptions: {
+      input: {
+        index: resolve(__vite_injected_original_dirname, "index.html"),
+        login: resolve(__vite_injected_original_dirname, "login.html"),
+        adminDashboard: resolve(__vite_injected_original_dirname, "pages/admin/dashboard.html"),
+        adminStudents: resolve(__vite_injected_original_dirname, "pages/admin/students.html"),
+        adminTeachers: resolve(__vite_injected_original_dirname, "pages/admin/teachers.html"),
+        adminClasses: resolve(__vite_injected_original_dirname, "pages/admin/classes.html"),
+        adminAttendance: resolve(__vite_injected_original_dirname, "pages/admin/attendance.html"),
+        adminGrades: resolve(__vite_injected_original_dirname, "pages/admin/grades.html"),
+        adminSettings: resolve(__vite_injected_original_dirname, "pages/admin/settings.html"),
+        studentDashboard: resolve(__vite_injected_original_dirname, "pages/student/dashboard.html"),
+        studentAttendance: resolve(__vite_injected_original_dirname, "pages/student/attendance.html"),
+        studentGrades: resolve(__vite_injected_original_dirname, "pages/student/grades.html"),
+        studentSettings: resolve(__vite_injected_original_dirname, "pages/student/settings.html"),
+        teacherDashboard: resolve(__vite_injected_original_dirname, "pages/teacher/dashboard.html"),
+        teacherStudents: resolve(__vite_injected_original_dirname, "pages/teacher/students.html"),
+        teacherAttendance: resolve(__vite_injected_original_dirname, "pages/teacher/attendance.html"),
+        teacherGrades: resolve(__vite_injected_original_dirname, "pages/teacher/grades.html"),
+        teacherSettings: resolve(__vite_injected_original_dirname, "pages/teacher/settings.html")
+      }
+    }
+  }
+});
+export {
+  vite_config_default as default
+};
+//# sourceMappingURL=data:application/json;base64,ewogICJ2ZXJzaW9uIjogMywKICAic291cmNlcyI6IFsidml0ZS5jb25maWcuanMiXSwKICAic291cmNlc0NvbnRlbnQiOiBbImNvbnN0IF9fdml0ZV9pbmplY3RlZF9vcmlnaW5hbF9kaXJuYW1lID0gXCJFOlxcXFxHaXRIdWIgUmVwb1xcXFxzY2hvb2wtbWFuYWdlbWVudC1zeXN0ZW1cXFxcZnJvbnRlbmRcIjtjb25zdCBfX3ZpdGVfaW5qZWN0ZWRfb3JpZ2luYWxfZmlsZW5hbWUgPSBcIkU6XFxcXEdpdEh1YiBSZXBvXFxcXHNjaG9vbC1tYW5hZ2VtZW50LXN5c3RlbVxcXFxmcm9udGVuZFxcXFx2aXRlLmNvbmZpZy5qc1wiO2NvbnN0IF9fdml0ZV9pbmplY3RlZF9vcmlnaW5hbF9pbXBvcnRfbWV0YV91cmwgPSBcImZpbGU6Ly8vRTovR2l0SHViJTIwUmVwby9zY2hvb2wtbWFuYWdlbWVudC1zeXN0ZW0vZnJvbnRlbmQvdml0ZS5jb25maWcuanNcIjtpbXBvcnQgeyBkZWZpbmVDb25maWcgfSBmcm9tICd2aXRlJztcbmltcG9ydCB7IHJlc29sdmUgfSBmcm9tICdwYXRoJztcbmltcG9ydCByZWFjdCBmcm9tICdAdml0ZWpzL3BsdWdpbi1yZWFjdCc7XG5cbmV4cG9ydCBkZWZhdWx0IGRlZmluZUNvbmZpZyh7XG4gIHBsdWdpbnM6IFtyZWFjdCgpXSxcbiAgcm9vdDogJy4nLFxuICBiYXNlOiAnLycsXG4gIHNlcnZlcjoge1xuICAgIHByb3h5OiB7XG4gICAgICAnL2FwaSc6IHtcbiAgICAgICAgdGFyZ2V0OiAnaHR0cDovL2xvY2FsaG9zdDo1MDAwJyxcbiAgICAgICAgY2hhbmdlT3JpZ2luOiB0cnVlLFxuICAgICAgICBzZWN1cmU6IGZhbHNlLFxuICAgICAgfVxuICAgIH1cbiAgfSxcbiAgYnVpbGQ6IHtcbiAgICBvdXREaXI6ICcuLi9kaXN0JyxcbiAgICBlbXB0eU91dERpcjogdHJ1ZSxcbiAgICByb2xsdXBPcHRpb25zOiB7XG4gICAgICBpbnB1dDoge1xuICAgICAgICBpbmRleDogcmVzb2x2ZShfX2Rpcm5hbWUsICdpbmRleC5odG1sJyksXG4gICAgICAgIGxvZ2luOiByZXNvbHZlKF9fZGlybmFtZSwgJ2xvZ2luLmh0bWwnKSxcbiAgICAgICAgYWRtaW5EYXNoYm9hcmQ6IHJlc29sdmUoX19kaXJuYW1lLCAncGFnZXMvYWRtaW4vZGFzaGJvYXJkLmh0bWwnKSxcbiAgICAgICAgYWRtaW5TdHVkZW50czogcmVzb2x2ZShfX2Rpcm5hbWUsICdwYWdlcy9hZG1pbi9zdHVkZW50cy5odG1sJyksXG4gICAgICAgIGFkbWluVGVhY2hlcnM6IHJlc29sdmUoX19kaXJuYW1lLCAncGFnZXMvYWRtaW4vdGVhY2hlcnMuaHRtbCcpLFxuICAgICAgICBhZG1pbkNsYXNzZXM6IHJlc29sdmUoX19kaXJuYW1lLCAncGFnZXMvYWRtaW4vY2xhc3Nlcy5odG1sJyksXG4gICAgICAgIGFkbWluQXR0ZW5kYW5jZTogcmVzb2x2ZShfX2Rpcm5hbWUsICdwYWdlcy9hZG1pbi9hdHRlbmRhbmNlLmh0bWwnKSxcbiAgICAgICAgYWRtaW5HcmFkZXM6IHJlc29sdmUoX19kaXJuYW1lLCAncGFnZXMvYWRtaW4vZ3JhZGVzLmh0bWwnKSxcbiAgICAgICAgYWRtaW5TZXR0aW5nczogcmVzb2x2ZShfX2Rpcm5hbWUsICdwYWdlcy9hZG1pbi9zZXR0aW5ncy5odG1sJyksXG4gICAgICAgIHN0dWRlbnREYXNoYm9hcmQ6IHJlc29sdmUoX19kaXJuYW1lLCAncGFnZXMvc3R1ZGVudC9kYXNoYm9hcmQuaHRtbCcpLFxuICAgICAgICBzdHVkZW50QXR0ZW5kYW5jZTogcmVzb2x2ZShfX2Rpcm5hbWUsICdwYWdlcy9zdHVkZW50L2F0dGVuZGFuY2UuaHRtbCcpLFxuICAgICAgICBzdHVkZW50R3JhZGVzOiByZXNvbHZlKF9fZGlybmFtZSwgJ3BhZ2VzL3N0dWRlbnQvZ3JhZGVzLmh0bWwnKSxcbiAgICAgICAgc3R1ZGVudFNldHRpbmdzOiByZXNvbHZlKF9fZGlybmFtZSwgJ3BhZ2VzL3N0dWRlbnQvc2V0dGluZ3MuaHRtbCcpLFxuICAgICAgICB0ZWFjaGVyRGFzaGJvYXJkOiByZXNvbHZlKF9fZGlybmFtZSwgJ3BhZ2VzL3RlYWNoZXIvZGFzaGJvYXJkLmh0bWwnKSxcbiAgICAgICAgdGVhY2hlclN0dWRlbnRzOiByZXNvbHZlKF9fZGlybmFtZSwgJ3BhZ2VzL3RlYWNoZXIvc3R1ZGVudHMuaHRtbCcpLFxuICAgICAgICB0ZWFjaGVyQXR0ZW5kYW5jZTogcmVzb2x2ZShfX2Rpcm5hbWUsICdwYWdlcy90ZWFjaGVyL2F0dGVuZGFuY2UuaHRtbCcpLFxuICAgICAgICB0ZWFjaGVyR3JhZGVzOiByZXNvbHZlKF9fZGlybmFtZSwgJ3BhZ2VzL3RlYWNoZXIvZ3JhZGVzLmh0bWwnKSxcbiAgICAgICAgdGVhY2hlclNldHRpbmdzOiByZXNvbHZlKF9fZGlybmFtZSwgJ3BhZ2VzL3RlYWNoZXIvc2V0dGluZ3MuaHRtbCcpXG4gICAgICB9XG4gICAgfVxuICB9XG59KTtcbiJdLAogICJtYXBwaW5ncyI6ICI7QUFBNFUsU0FBUyxvQkFBb0I7QUFDelcsU0FBUyxlQUFlO0FBQ3hCLE9BQU8sV0FBVztBQUZsQixJQUFNLG1DQUFtQztBQUl6QyxJQUFPLHNCQUFRLGFBQWE7QUFBQSxFQUMxQixTQUFTLENBQUMsTUFBTSxDQUFDO0FBQUEsRUFDakIsTUFBTTtBQUFBLEVBQ04sTUFBTTtBQUFBLEVBQ04sUUFBUTtBQUFBLElBQ04sT0FBTztBQUFBLE1BQ0wsUUFBUTtBQUFBLFFBQ04sUUFBUTtBQUFBLFFBQ1IsY0FBYztBQUFBLFFBQ2QsUUFBUTtBQUFBLE1BQ1Y7QUFBQSxJQUNGO0FBQUEsRUFDRjtBQUFBLEVBQ0EsT0FBTztBQUFBLElBQ0wsUUFBUTtBQUFBLElBQ1IsYUFBYTtBQUFBLElBQ2IsZUFBZTtBQUFBLE1BQ2IsT0FBTztBQUFBLFFBQ0wsT0FBTyxRQUFRLGtDQUFXLFlBQVk7QUFBQSxRQUN0QyxPQUFPLFFBQVEsa0NBQVcsWUFBWTtBQUFBLFFBQ3RDLGdCQUFnQixRQUFRLGtDQUFXLDRCQUE0QjtBQUFBLFFBQy9ELGVBQWUsUUFBUSxrQ0FBVywyQkFBMkI7QUFBQSxRQUM3RCxlQUFlLFFBQVEsa0NBQVcsMkJBQTJCO0FBQUEsUUFDN0QsY0FBYyxRQUFRLGtDQUFXLDBCQUEwQjtBQUFBLFFBQzNELGlCQUFpQixRQUFRLGtDQUFXLDZCQUE2QjtBQUFBLFFBQ2pFLGFBQWEsUUFBUSxrQ0FBVyx5QkFBeUI7QUFBQSxRQUN6RCxlQUFlLFFBQVEsa0NBQVcsMkJBQTJCO0FBQUEsUUFDN0Qsa0JBQWtCLFFBQVEsa0NBQVcsOEJBQThCO0FBQUEsUUFDbkUsbUJBQW1CLFFBQVEsa0NBQVcsK0JBQStCO0FBQUEsUUFDckUsZUFBZSxRQUFRLGtDQUFXLDJCQUEyQjtBQUFBLFFBQzdELGlCQUFpQixRQUFRLGtDQUFXLDZCQUE2QjtBQUFBLFFBQ2pFLGtCQUFrQixRQUFRLGtDQUFXLDhCQUE4QjtBQUFBLFFBQ25FLGlCQUFpQixRQUFRLGtDQUFXLDZCQUE2QjtBQUFBLFFBQ2pFLG1CQUFtQixRQUFRLGtDQUFXLCtCQUErQjtBQUFBLFFBQ3JFLGVBQWUsUUFBUSxrQ0FBVywyQkFBMkI7QUFBQSxRQUM3RCxpQkFBaUIsUUFBUSxrQ0FBVyw2QkFBNkI7QUFBQSxNQUNuRTtBQUFBLElBQ0Y7QUFBQSxFQUNGO0FBQ0YsQ0FBQzsiLAogICJuYW1lcyI6IFtdCn0K

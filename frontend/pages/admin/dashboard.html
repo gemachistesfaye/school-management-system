@@ -8,201 +8,277 @@
   <link rel="stylesheet" href="../../assets/css/admin-theme.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
-    .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
-    .stat-card-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 12px; }
-    .icon-blue { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
-    .icon-green { background: rgba(34, 197, 94, 0.1); color: #22c55e; }
-    .icon-purple { background: rgba(168, 85, 247, 0.1); color: #a855f7; }
-    .icon-amber { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
-    .stat-card { background: #fff; border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-    .stat-card-value { font-size: 28px; font-weight: 700; color: var(--text-dark); margin-bottom: 4px; }
-    .stat-card-label { font-size: 14px; color: var(--text-muted); font-weight: 500; }
+    .stat-card { background:#fff; border:1px solid var(--border); border-radius:var(--radius-card); padding:24px; box-shadow:var(--shadow-card); display:flex; flex-direction:column; gap:4px; transition:transform .15s, box-shadow .15s; }
+    .stat-card:hover { transform:translateY(-2px); box-shadow:0 8px 25px rgba(0,0,0,.08); }
+    .stat-icon { width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:8px; }
+    .stat-value { font-size:28px;font-weight:800;color:var(--text-primary);line-height:1; }
+    .stat-label { font-size:13px;color:var(--text-muted);font-weight:500; }
+    .stat-trend { font-size:12px;font-weight:600;margin-top:4px; }
+    .stat-trend.up { color:#22c55e; }
+    .stat-trend.down { color:#ef4444; }
+    .metric-card { background:#fff; border:1px solid var(--border); border-radius:var(--radius-card); padding:20px 24px; box-shadow:var(--shadow-card); }
+    .metric-value { font-size:32px;font-weight:800;color:var(--text-primary); }
+    .metric-label { font-size:13px;color:var(--text-muted);font-weight:500;margin-top:2px; }
+    .metric-bar { margin-top:12px;background:var(--bg-main);border-radius:4px;height:8px;overflow:hidden; }
+    .metric-bar-fill { height:100%;border-radius:4px;transition:width .6s ease; }
+    .chart-card { background:#fff; border:1px solid var(--border); border-radius:var(--radius-card); padding:24px; box-shadow:var(--shadow-card); }
+    .chart-title { font-size:15px;font-weight:700;color:var(--text-primary);margin-bottom:16px; }
+    .skeleton { background:linear-gradient(90deg,#e2ebe5 25%,#f0faf4 50%,#e2ebe5 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:6px; }
+    @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+    .grid-4 { display:grid;grid-template-columns:repeat(4,1fr);gap:20px; }
+    .grid-3 { display:grid;grid-template-columns:repeat(3,1fr);gap:20px; }
+    .grid-2 { display:grid;grid-template-columns:repeat(2,1fr);gap:24px; }
+    @media (max-width:1100px){.grid-4{grid-template-columns:repeat(2,1fr)}}
+    @media (max-width:760px){.grid-4,.grid-3,.grid-2{grid-template-columns:1fr}}
   </style>
+
+<style class="premium-sidebar-css">
+  aside { background: #0F172A !important; border-right: none !important; }
+  .nav-item { display:flex !important; align-items:center !important; gap:12px !important; padding:10px 16px !important; border-radius:10px !important; color:#94A3B8 !important; font-size:13.5px !important; font-weight:500 !important; text-decoration:none !important; transition:all 0.2s ease !important; margin: 2px 8px !important; font-family: 'Inter', sans-serif !important; box-sizing: border-box !important; background: transparent !important; border-left: 3px solid transparent !important; box-shadow: none !important; }
+  .nav-item:hover { background:rgba(255,255,255,0.06) !important; color:#F8FAFC !important; }
+  .nav-item.active { background:rgba(255,255,255,0.1) !important; color:#F8FAFC !important; font-weight:600 !important; border-left: 3px solid #C39A48 !important; border-radius: 4px 10px 10px 4px !important; box-shadow: none !important; }
+  .nav-item i { width: 16px !important; text-align: center !important; font-size: 14px !important; opacity: 0.8 !important; transition:0.2s !important; color: inherit !important; }
+  .nav-item:hover i { opacity: 1 !important; color: #fff !important; }
+  .nav-item.active i { opacity: 1 !important; color: #E8CE8A !important; }
+  .sidebar-nav::-webkit-scrollbar { width: 4px; }
+  .sidebar-nav::-webkit-scrollbar-track { background: transparent; }
+  .sidebar-nav::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+  .sidebar-section-label { font-size:10px !important; font-weight:700 !important; text-transform:uppercase !important; letter-spacing:0.15em !important; color:#64748B !important; padding:20px 24px 8px !important; font-family: 'Inter', sans-serif !important; }
+</style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
 </head>
 <body>
 <div class="app-shell">
   <aside class="sidebar">
-    <div class="sidebar-logo">
-      <div class="sidebar-logo-icon">🎓</div>
-      <div><div class="sidebar-logo-text">EduFlow</div><div class="sidebar-logo-sub">School Navigator</div></div>
+
+    <div style="display: flex; align-items: center; gap: 12px; padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+      <div style="width: 36px; height: 36px; background: linear-gradient(135deg,#f2d480,#c39a48); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; color: #0F172A; flex-shrink: 0;">🎓</div>
+      <div>
+        <div style="color: #fff; font-weight: 700; font-size: 16px; font-family: 'Inter', sans-serif; line-height: 1.2;">EduFlow</div>
+        <div style="color: #C39A48; font-weight: 700; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 2px;">School Navigator</div>
+      </div>
     </div>
-    <div class="sidebar-section-label">Main</div>
-    <nav style="flex: 1; overflow-y: auto; padding-right: 4px;">
-      <a href="dashboard.html"  class="nav-item">🏠 &nbsp;Dashboard</a>
-      <a href="students.html"   class="nav-item">👥 &nbsp;Students</a>
-      <a href="teachers.html"   class="nav-item">🧑‍🏫 &nbsp;Teachers</a>
-      <a href="parents.html"    class="nav-item">👨‍👩‍👧 &nbsp;Parents</a>
-      <a href="classes.html"    class="nav-item">🏫 &nbsp;Classes</a>
-      <a href="subjects.html"   class="nav-item">📚 &nbsp;Subjects</a>
-      <div class="sidebar-section-label" style="margin-top:16px;">Academics</div>
-      <a href="attendance.html" class="nav-item">📅 &nbsp;Attendance</a>
-      <a href="grades.html"     class="nav-item">📈 &nbsp;Grades</a>
-      <a href="exams.html"      class="nav-item">📝 &nbsp;Exams</a>
-      <a href="timetable.html"  class="nav-item">⏰ &nbsp;Timetable</a>
-      <a href="academic-year.html" class="nav-item">🗓️ &nbsp;Academic Year</a>
-      <div class="sidebar-section-label" style="margin-top:16px;">System</div>
-      <a href="announcements.html" class="nav-item">📢 &nbsp;Announcements</a>
-      <a href="reports.html"    class="nav-item">📊 &nbsp;Reports</a>
-      <a href="notifications.html" class="nav-item">🔔 &nbsp;Notifications</a>
-      <a href="audit-logs.html" class="nav-item">🛡️ &nbsp;Audit Logs</a>
-      <a href="settings.html"   class="nav-item">⚙️ &nbsp;Settings</a>
+    <nav class="sidebar-nav" style="flex: 1; overflow-y: auto; padding: 12px 0;">
+      <div class="sidebar-section-label">Main</div>
+      <a href="dashboard.html" class="nav-item"><i class="fa-solid fa-house"></i> Dashboard</a>
+      <a href="students.html" class="nav-item"><i class="fa-solid fa-users"></i> Students</a>
+      <a href="teachers.html" class="nav-item"><i class="fa-solid fa-chalkboard-user"></i> Teachers</a>
+      <a href="parents.html" class="nav-item"><i class="fa-solid fa-people-roof"></i> Parents</a>
+      <a href="classes.html" class="nav-item"><i class="fa-solid fa-school"></i> Classes</a>
+      <a href="subjects.html" class="nav-item"><i class="fa-solid fa-book"></i> Subjects</a>
+      <div class="sidebar-section-label">Academics</div>
+      <a href="attendance.html" class="nav-item"><i class="fa-solid fa-calendar-check"></i> Attendance</a>
+      <a href="grades.html" class="nav-item"><i class="fa-solid fa-chart-line"></i> Grades</a>
+      <a href="exams.html" class="nav-item"><i class="fa-solid fa-file-signature"></i> Exams</a>
+      <a href="timetable.html" class="nav-item"><i class="fa-solid fa-clock"></i> Timetable</a>
+      <a href="academic-year.html" class="nav-item"><i class="fa-solid fa-calendar-days"></i> Academic Year</a>
+      <div class="sidebar-section-label">System</div>
+      <a href="announcements.html" class="nav-item"><i class="fa-solid fa-bullhorn"></i> Announcements</a>
+      <a href="reports.html" class="nav-item"><i class="fa-solid fa-chart-pie"></i> Reports</a>
+      <a href="notifications.html" class="nav-item"><i class="fa-regular fa-bell"></i> Notifications</a>
+      <a href="audit-logs.html" class="nav-item"><i class="fa-solid fa-shield-halved"></i> Audit Logs</a>
+      <a href="settings.html" class="nav-item"><i class="fa-solid fa-gear"></i> Settings</a>
     </nav>
-    <div class="sidebar-footer">
-      <button id="logout-btn" style="display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:8px;border:none;background:rgba(239,68,68,.12);color:#f87171;font-size:13px;font-weight:600;cursor:pointer;width:100%;">🚪 &nbsp;Logout</button>
+    <div style="padding: 16px; border-top: 1px solid rgba(255,255,255,0.05); background: rgba(0,0,0,0.15);">
+      <button id="logout-btn" style="display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 10px; border-radius: 8px; background: transparent !important; border: none !important; color: #94A3B8 !important; font-size: 13.5px; font-weight: 600; cursor: pointer; transition: 0.2s;" onmouseover="this.style.color='#fff'; this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.color='#94A3B8'; this.style.background='transparent'"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</button>
     </div>
-  </aside>
+</aside>
 
   <div class="main-content">
     <header class="top-header">
       <div class="header-search">🔍 <input placeholder="Search anything…" type="text" id="search-input"></div>
       <div class="header-right">
-        <div class="header-user"><div class="header-avatar">A</div><span>Admin</span></div>
+        <div class="header-user"><div class="header-avatar" id="header-avatar">A</div><span id="header-name">Admin</span></div>
       </div>
     </header>
 
     <div class="page-body">
       <div class="page-title-row">
-        <div><div class="page-title">Dashboard Overview</div><div class="page-subtitle">Welcome back, Admin. Here's what's happening today.</div></div>
+        <div>
+          <div class="page-title">Dashboard</div>
+          <div class="page-subtitle" id="welcome-text">Loading your school data...</div>
+        </div>
+        <span style="font-size:12px;color:var(--text-muted);" id="last-updated"></span>
       </div>
 
-      <!-- Quick Actions -->
+      <!-- Key Metrics -->
       <div class="grid-4" style="margin-bottom:24px;">
-        <a href="students.html" class="stat-card hover-card" style="text-decoration:none; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px;">
-           <div class="stat-card-icon icon-blue">👥</div>
-           <div class="stat-card-label" style="color:var(--primary-color); font-weight:600;">Add Student</div>
-        </a>
-        <a href="teachers.html" class="stat-card hover-card" style="text-decoration:none; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px;">
-           <div class="stat-card-icon icon-green">🧑‍🏫</div>
-           <div class="stat-card-label" style="color:var(--success-color); font-weight:600;">Add Teacher</div>
-        </a>
-        <a href="attendance.html" class="stat-card hover-card" style="text-decoration:none; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px;">
-           <div class="stat-card-icon icon-amber">📅</div>
-           <div class="stat-card-label" style="color:#f59e0b; font-weight:600;">Attendance</div>
-        </a>
-        <a href="announcements.html" class="stat-card hover-card" style="text-decoration:none; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px;">
-           <div class="stat-card-icon icon-purple">📢</div>
-           <div class="stat-card-label" style="color:#8b5cf6; font-weight:600;">Announce</div>
-        </a>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#d8f3dc;color:#1b4332;">👥</div>
+          <div class="stat-value" id="stat-students"><span class="skeleton" style="display:inline-block;width:60px;height:32px;"></span></div>
+          <div class="stat-label">Total Students</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#dbeafe;color:#1e40af;">🧑‍🏫</div>
+          <div class="stat-value" id="stat-teachers"><span class="skeleton" style="display:inline-block;width:60px;height:32px;"></span></div>
+          <div class="stat-label">Total Teachers</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#ede9fe;color:#5b21b6;">👨‍👩‍👧</div>
+          <div class="stat-value" id="stat-parents"><span class="skeleton" style="display:inline-block;width:60px;height:32px;"></span></div>
+          <div class="stat-label">Total Parents</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#fef3c7;color:#92400e;">🏫</div>
+          <div class="stat-value" id="stat-classes"><span class="skeleton" style="display:inline-block;width:60px;height:32px;"></span></div>
+          <div class="stat-label">Total Classes</div>
+        </div>
       </div>
 
-      <!-- KPI Cards -->
-      <div class="grid-4" style="margin-bottom:24px;">
-        <div class="stat-card"><div class="stat-card-icon icon-blue">👥</div><div class="stat-card-value" id="stat-students">1,245</div><div class="stat-card-label">Total Students</div></div>
-        <div class="stat-card"><div class="stat-card-icon icon-green">🧑‍🏫</div><div class="stat-card-value" id="stat-teachers">78</div><div class="stat-card-label">Total Teachers</div></div>
-        <div class="stat-card"><div class="stat-card-icon icon-purple">👨‍👩‍👧</div><div class="stat-card-value" id="stat-parents">540</div><div class="stat-card-label">Total Parents</div></div>
-        <div class="stat-card"><div class="stat-card-icon icon-amber">🏫</div><div class="stat-card-value" id="stat-classes">32</div><div class="stat-card-label">Total Classes</div></div>
-      </div>
-
-      <!-- Secondary KPIs -->
+      <!-- Performance Metrics -->
       <div class="grid-3" style="margin-bottom:24px;">
-        <div class="card">
-          <div style="color:var(--text-muted);font-size:13px;margin-bottom:4px;font-weight:600;">Attendance Rate</div>
-          <div style="font-size:24px;font-weight:700;color:var(--success-color);">92.4%</div>
-          <div style="margin-top:12px;background:var(--bg-subtle);border-radius:4px;height:6px;"><div style="background:var(--success-color);height:6px;border-radius:4px;width:92.4%;"></div></div>
+        <div class="metric-card">
+          <div style="font-size:13px;font-weight:600;color:var(--text-muted);margin-bottom:2px;">Attendance Rate</div>
+          <div class="metric-value" id="metric-attendance" style="color:#22c55e;">—</div>
+          <div class="metric-bar"><div class="metric-bar-fill" id="attendance-bar" style="width:0%;background:#22c55e;"></div></div>
         </div>
-        <div class="card">
-          <div style="color:var(--text-muted);font-size:13px;margin-bottom:4px;font-weight:600;">Avg Academic Score</div>
-          <div style="font-size:24px;font-weight:700;color:var(--primary-color);">78.5%</div>
-          <div style="margin-top:12px;background:var(--bg-subtle);border-radius:4px;height:6px;"><div style="background:var(--primary-color);height:6px;border-radius:4px;width:78.5%;"></div></div>
+        <div class="metric-card">
+          <div style="font-size:13px;font-weight:600;color:var(--text-muted);margin-bottom:2px;">Subjects Offered</div>
+          <div class="metric-value" id="metric-subjects" style="color:#3b82f6;">—</div>
+          <div class="metric-bar"><div class="metric-bar-fill" id="subjects-bar" style="width:0%;background:#3b82f6;"></div></div>
         </div>
-        <div class="card">
-          <div style="color:var(--text-muted);font-size:13px;margin-bottom:4px;font-weight:600;">Active Announcements</div>
-          <div style="font-size:24px;font-weight:700;color:#f59e0b;">7</div>
-          <div style="font-size:12px;color:var(--text-muted);margin-top:8px;">3 expiring this week</div>
+        <div class="metric-card">
+          <div style="font-size:13px;font-weight:600;color:var(--text-muted);margin-bottom:2px;">Fee Collection</div>
+          <div class="metric-value" id="metric-fees" style="font-size:24px;color:#f59e0b;">—</div>
+          <div style="font-size:12px;color:var(--text-muted);margin-top:4px;">Total: <span id="metric-total-fees">—</span></div>
         </div>
       </div>
 
       <!-- Charts -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px;">
-        <div class="card">
-          <div class="card-header" style="font-weight:600;font-size:16px;margin-bottom:16px;">Enrollment Trends</div>
-          <div style="position: relative; height: 250px; width: 100%;">
+      <div class="grid-2" style="margin-bottom:24px;">
+        <div class="chart-card">
+          <div class="chart-title">Enrollment Trends</div>
+          <div style="position:relative;height:260px;width:100%;">
             <canvas id="enrollmentChart"></canvas>
           </div>
         </div>
-        <div class="card">
-          <div class="card-header" style="font-weight:600;font-size:16px;margin-bottom:16px;">Attendance Analytics</div>
-          <div style="position: relative; height: 250px; width: 100%;">
+        <div class="chart-card">
+          <div class="chart-title">Attendance Distribution</div>
+          <div style="position:relative;height:260px;width:100%;">
             <canvas id="attendanceChart"></canvas>
           </div>
         </div>
       </div>
-      
+
     </div>
   </div>
 </div>
 
 <!-- Confirm Modal -->
-<div class="modal-overlay" id="confirm-modal" style="z-index: 1000; display:none; position:fixed; inset:0; background:rgba(0,0,0,.35); align-items:center; justify-content:center;">
-  <div class="modal" style="background:#fff; border-radius:14px; padding:32px; max-width: 400px; text-align: center; box-shadow:0 20px 60px rgba(0,0,0,.15);">
-    <h2 style="font-size: 18px; margin-bottom: 12px; font-weight:700; color:var(--text-dark);" id="confirm-title">Are you sure?</h2>
-    <p style="color: #6b7280; margin-bottom: 24px;" id="confirm-msg">This action cannot be undone.</p>
-    <div style="display: flex; gap: 12px; justify-content: center;">
-      <button class="btn btn-outline" onclick="closeConfirm()" style="flex: 1;">Cancel</button>
-      <button class="btn btn-primary" id="confirm-btn" style="flex: 1; background: #ef4444; color: white; border-color: #ef4444;">Confirm</button>
+<div class="modal-overlay" id="confirm-modal" style="z-index:1000;display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);align-items:center;justify-content:center;">
+  <div class="modal" style="background:#fff;border-radius:14px;padding:32px;max-width:400px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.15);">
+    <h2 style="font-size:18px;margin-bottom:12px;font-weight:700;color:var(--text-primary);" id="confirm-title">Are you sure?</h2>
+    <p style="color:#6b7280;margin-bottom:24px;" id="confirm-msg">This action cannot be undone.</p>
+    <div style="display:flex;gap:12px;justify-content:center;">
+      <button class="btn btn-outline" onclick="closeConfirm()" style="flex:1;">Cancel</button>
+      <button class="btn btn-primary" id="confirm-btn" style="flex:1;background:#ef4444;color:white;border-color:#ef4444;">Confirm</button>
     </div>
   </div>
 </div>
 
 <script>
-  let confirmCallback = null;
-  function openConfirm(title, msg, callback) {
-    document.getElementById('confirm-title').textContent = title;
-    document.getElementById('confirm-msg').textContent = msg;
-    confirmCallback = callback;
-    document.getElementById('confirm-modal').style.display = 'flex';
-  }
-  function closeConfirm() { document.getElementById('confirm-modal').style.display = 'none'; }
-  document.getElementById('confirm-btn').onclick = () => { if(confirmCallback) confirmCallback(); closeConfirm(); };
+  let confirmCallback=null;
+  function openConfirm(t,m,cb){document.getElementById('confirm-title').textContent=t;document.getElementById('confirm-msg').textContent=m;confirmCallback=cb;document.getElementById('confirm-modal').style.display='flex';}
+  function closeConfirm(){document.getElementById('confirm-modal').style.display='none';}
+  document.getElementById('confirm-btn').onclick=()=>{if(confirmCallback)confirmCallback();closeConfirm();};
 
-  const token = localStorage.getItem('access_token');
-  if (!token) window.location.href = '../../login.html';
-  document.getElementById('logout-btn').onclick = () => {
-    openConfirm("Log Out", "Are you sure you want to log out of your session?", () => {
-      localStorage.removeItem('access_token'); window.location.href = '../../login.html';
+  const token=localStorage.getItem('access_token');
+  if(!token)window.location.href='../../login.html';
+
+  document.getElementById('logout-btn').onclick=()=>{
+    openConfirm("Log Out","Are you sure you want to log out?",()=>{
+      localStorage.removeItem('access_token');window.location.href='../../login.html';
     });
   };
 
-  // Charts
-  const chartDefaults = { color: '#6b7280', borderColor: '#e5e7eb' };
-  Chart.defaults.color = chartDefaults.color;
-  Chart.defaults.borderColor = chartDefaults.borderColor;
+  // Load LIVE data from backend - NO hardcoded values
+  async function loadDashboard() {
+    try {
+      const res = await fetch('/api/admin/school-metrics', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!res.ok) throw new Error('Failed to load metrics');
+      const data = await res.json();
+
+      // Primary stats
+      document.getElementById('stat-students').textContent = (data.students || 0).toLocaleString();
+      document.getElementById('stat-teachers').textContent = (data.teachers || 0).toLocaleString();
+      document.getElementById('stat-parents').textContent = (data.parents || 0).toLocaleString();
+      document.getElementById('stat-classes').textContent = (data.classes || 0).toLocaleString();
+
+      // Performance metrics
+      document.getElementById('metric-attendance').textContent = data.attendance_rate || '0%';
+      const rate = parseInt(data.attendance_rate) || 0;
+      document.getElementById('attendance-bar').style.width = rate + '%';
+
+      document.getElementById('metric-subjects').textContent = data.subjects || 0;
+      const subjPct = Math.min(((data.subjects || 0) / 20) * 100, 100);
+      document.getElementById('subjects-bar').style.width = subjPct + '%';
+
+      document.getElementById('metric-fees').textContent = data.fees_collected || '$0';
+      document.getElementById('metric-total-fees').textContent = data.total_fees || '$0';
+
+      // Welcome text
+      const user = localStorage.getItem('user_role') || 'Admin';
+      document.getElementById('welcome-text').textContent = `${data.students || 0} students enrolled across ${data.classes || 0} classes.`;
+      document.getElementById('last-updated').textContent = `Updated ${new Date().toLocaleTimeString()}`;
+      
+    } catch (err) {
+      console.error('Dashboard load error:', err);
+      document.querySelectorAll('.stat-value').forEach(el => {
+        if (el.querySelector('.skeleton')) el.textContent = '—';
+      });
+    }
+  }
+  loadDashboard();
+
+  // Charts - using sample enrollment data (real data would come from analytics endpoint)
+  Chart.defaults.color = '#6b7280';
+  Chart.defaults.borderColor = '#e2ebe5';
 
   new Chart(document.getElementById('enrollmentChart'), {
     type: 'line',
     data: {
-      labels: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+      labels: ['Sep','Oct','Nov','Dec','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug'],
       datasets: [{
-        label: 'Students Enrolled',
-        data: [120,150,170,180,220,260,300,340,380,400,420,460],
-        borderColor: '#4f46e5',
-        backgroundColor: 'rgba(79,70,229,0.1)',
-        tension: 0.4, fill: true
+        label: 'Students',
+        data: [180,210,245,280,320,350,380,410,430,445,460,480],
+        borderColor: '#40916c',
+        backgroundColor: 'rgba(64,145,108,0.08)',
+        tension: 0.4, fill: true,
+        pointBackgroundColor: '#40916c',
+        pointRadius: 3
       }]
     },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false } } } }
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: { x: { grid: { display: false }, ticks: { font: { size: 11 } } },
+               y: { grid: { color: '#e2ebe5' }, ticks: { font: { size: 11 } } } }
+    }
   });
 
   new Chart(document.getElementById('attendanceChart'), {
     type: 'doughnut',
     data: {
-      labels: ['Present','Absent','Late'],
-      datasets: [{ data: [92, 5, 3], backgroundColor: ['#22c55e','#ef4444','#f59e0b'], hoverOffset: 4, borderWidth: 0 }]
+      labels: ['Present','Absent','Late','Excused'],
+      datasets: [{ data: [85, 8, 5, 2], backgroundColor: ['#22c55e','#ef4444','#f59e0b','#3b82f6'], borderWidth: 0, hoverOffset: 4 }]
     },
-    options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { position: 'bottom' } } }
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      cutout: '72%',
+      plugins: {
+        legend: { position: 'bottom', labels: { boxWidth: 12, padding: 12, font: { size: 12 } } }
+      }
+    }
   });
 </script>
 
 <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const page = location.pathname.split('/').pop().replace('.html', '');
-    document.querySelectorAll('.nav-item').forEach(link => {
-      if (link.getAttribute('href') === page + '.html' || link.getAttribute('href') === page) {
-        link.classList.add('active');
-      } else {
-        link.classList.remove('active');
-      }
+  document.addEventListener('DOMContentLoaded',()=>{
+    const page=location.pathname.split('/').pop().replace('.html','');
+    document.querySelectorAll('.nav-item').forEach(link=>{
+      link.classList.toggle('active',link.getAttribute('href')===page+'.html'||link.getAttribute('href')===page);
     });
   });
 </script>

@@ -2,303 +2,440 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>EduFlow Admin</title>
+  <title>Students | EduFlow Admin</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../../assets/css/theme.css">
-  <link rel="stylesheet" href="../../assets/css/admin-theme.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            navy: '#0F172A',
+            gold: '#E8CE8A',
+            'gold-dark': '#C39A48',
+          },
+          fontFamily: { sans: ['Inter', 'sans-serif'] }
+        }
+      }
+    };
+  </script>
   <style>
-    .mb-6 { margin-bottom: 1.5rem; }
-    .flex { display: flex; }
-    .items-center { align-items: center; }
-    .justify-between { justify-content: space-between; }
-    .gap-2 { gap: 0.5rem; }
-    .text-2xl { font-size: 1.5rem; line-height: 2rem; }
-    .font-semibold { font-weight: 600; }
-    .text-dark { color: var(--text-dark); }
-    .text-white { color: #ffffff; }
-    .w-5 { width: 1.25rem; }
-    .h-5 { height: 1.25rem; }
-    .p-4 { padding: 1rem; }
-    .rounded-xl { border-radius: 0.75rem; }
-    .shadow-sm { box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); }
-    .bg-white { background-color: #ffffff; }
-    .w-full { width: 100%; }
-    .table-auto { table-layout: auto; }
-    .text-left { text-align: left; }
-    .bg-gray-100 { background-color: #f3f4f6; }
-    .p-2 { padding: 0.5rem; }
-    .font-medium { font-weight: 500; }
-    .text-center { text-align: center; }
-    .text-gray-500 { color: #6b7280; }
-    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:100;align-items:center;justify-content:center;}
-    .modal-overlay.open{display:flex;}
-    .modal{background:#fff;border-radius:14px;padding:28px;width:100%;max-width:480px;box-shadow:0 20px 60px rgba(0,0,0,.15);}
-    .modal h2{font-size:17px;font-weight:700;margin-bottom:20px;}
-    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-    .nav-item.active { background: linear-gradient(to right, #c39a48, #e8ce8a, #c39a48); color: #ffffff; font-weight: 700; border: none; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
-    .grid { display: grid; }
-    .grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
-    @media(min-width: 768px) { .md\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-    @media(min-width: 1024px) { .lg\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-    .gap-4 { gap: 1rem; }
-    .mt-4 { margin-top: 1rem; }
-    .text-danger { color: #ef4444; }
-    .bg-success { background-color: #22c55e; }
-    .bg-gray-400 { background-color: #9ca3af; }
-    .space-y-4 > * + * { margin-top: 1rem; }
-    .animate-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
-    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
+    body { font-family: 'Inter', sans-serif; }
+    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:200; align-items:center; justify-content:center; }
+    .modal-overlay.open { display:flex; }
+    @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+    .skeleton { background:linear-gradient(90deg,#E2E8F0 25%,#F8FAFC 50%,#E2E8F0 75%); background-size:200% 100%; animation:shimmer 1.5s infinite; border-radius:6px; display:inline-block; }
+    .nav-item { display:flex; align-items:center; gap:12px; padding:10px 16px; border-radius:10px; color:#94A3B8; font-size:13.5px; font-weight:500; text-decoration:none; transition:all 0.2s ease; margin: 2px 8px; }
+    .nav-item:hover { background:rgba(255,255,255,0.06); color:#F8FAFC; }
+    .nav-item.active { background:rgba(255,255,255,0.1); color:#F8FAFC; font-weight:600; border-left: 3px solid #C39A48; border-radius: 4px 10px 10px 4px; }
+    .nav-item i { width: 16px; text-align: center; font-size: 14px; opacity: 0.8; transition:0.2s; }
+    .nav-item:hover i { opacity: 1; color: #fff; }
+    .nav-item.active i { opacity: 1; color: #E8CE8A; }
+    .sidebar-nav::-webkit-scrollbar { width: 4px; }
+    .sidebar-nav::-webkit-scrollbar-track { background: transparent; }
+    .sidebar-nav::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+    .form-input { width:100%; border:1.5px solid #E2E8F0; border-radius:8px; padding:8px 12px; font-size:14px; outline:none; transition:.15s; font-family:'Inter',sans-serif; }
+    .form-input:focus { border-color:#C39A48; box-shadow:0 0 0 3px rgba(195,154,72,.15); }
+    .form-label { display:block; font-size:12px; font-weight:600; color:#475569; margin-bottom:5px; }
+    .btn { border-radius:8px; font-weight:600; font-size:13.5px; padding:8px 16px; cursor:pointer; border:none; transition:.15s; display:inline-flex; align-items:center; gap:6px; }
+    .btn-primary { background:#0F172A; color:#fff; }
+    .btn-primary:hover { background:#1E293B; }
+    .btn-outline { background:#fff; color:#0F172A; border:1.5px solid #CBD5E1; }
+    .btn-outline:hover { background:#F8FAFC; }
+    .btn-sm { padding:5px 10px; font-size:12px; border-radius:6px; }
+    .badge { display:inline-flex; align-items:center; padding:2px 10px; border-radius:999px; font-size:12px; font-weight:600; }
+    .badge-green { background:#DCFCE7; color:#15803D; }
+    .badge-red { background:#FEE2E2; color:#DC2626; }
+    .badge-gray { background:#F1F5F9; color:#475569; }
+    table { width:100%; border-collapse:collapse; }
+    th { background:#F8FAFC; color:#475569; font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; padding:11px 14px; text-align:left; border-bottom:2px solid #E2E8F0; }
+    td { padding:11px 14px; color:#334155; font-size:14px; border-bottom:1px solid #F1F5F9; }
+    tr:hover td { background:#FAFBFD; }
+    .alert-error { background:#FEE2E2; color:#DC2626; border:1px solid #FECACA; border-radius:8px; padding:10px 14px; font-size:13px; margin-bottom:14px; }
+    .section-label { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.15em; color:#64748B; padding:20px 24px 8px; }
   </style>
-</head>
-<body>
-<div class="app-shell">
-  <aside class="sidebar">
-    <div class="sidebar-logo">
-      <div class="sidebar-logo-icon">🎓</div>
-      <div><div class="sidebar-logo-text">EduFlow</div><div class="sidebar-logo-sub">School Navigator</div></div>
-    </div>
-    <div class="sidebar-section-label">Main</div>
-    <nav style="flex: 1; overflow-y: auto; padding-right: 4px;">
-      <a href="dashboard.html"  class="nav-item">🏠 &nbsp;Dashboard</a>
-      <a href="students.html"   class="nav-item">👥 &nbsp;Students</a>
-      <a href="teachers.html"   class="nav-item">🧑‍🏫 &nbsp;Teachers</a>
-      <a href="parents.html"    class="nav-item">👨‍👩‍👧 &nbsp;Parents</a>
-      <a href="classes.html"    class="nav-item">🏫 &nbsp;Classes</a>
-      <a href="subjects.html"   class="nav-item">📚 &nbsp;Subjects</a>
-      <div class="sidebar-section-label" style="margin-top:16px;">Academics</div>
-      <a href="attendance.html" class="nav-item">📅 &nbsp;Attendance</a>
-      <a href="grades.html"     class="nav-item">📈 &nbsp;Grades</a>
-      <a href="exams.html"      class="nav-item">📝 &nbsp;Exams</a>
-      <a href="timetable.html"  class="nav-item">⏰ &nbsp;Timetable</a>
-      <a href="academic-year.html" class="nav-item">🗓️ &nbsp;Academic Year</a>
-      <div class="sidebar-section-label" style="margin-top:16px;">System</div>
-      <a href="announcements.html" class="nav-item">📢 &nbsp;Announcements</a>
-      <a href="reports.html"    class="nav-item">📊 &nbsp;Reports</a>
-      <a href="notifications.html" class="nav-item">🔔 &nbsp;Notifications</a>
-      <a href="audit-logs.html" class="nav-item">🛡️ &nbsp;Audit Logs</a>
-      <a href="settings.html"   class="nav-item">⚙️ &nbsp;Settings</a>
-    </nav>
-    <div class="sidebar-footer">
-      <button id="logout-btn" style="display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:8px;border:none;background:rgba(239,68,68,.12);color:#f87171;font-size:13px;font-weight:600;cursor:pointer;width:100%;">🚪 &nbsp;Logout</button>
-    </div>
-  </aside>
 
-  <div class="main-content">
-    <header class="top-header">
-      <div class="header-search">🔍 <input placeholder="Search…" type="text" id="search-input"></div>
-      <div class="header-right">
-        <div class="header-user"><div class="header-avatar">A</div><span>Admin</span></div>
+<style class="premium-sidebar-css">
+  aside { background: #0F172A !important; border-right: none !important; }
+  .nav-item { display:flex !important; align-items:center !important; gap:12px !important; padding:10px 16px !important; border-radius:10px !important; color:#94A3B8 !important; font-size:13.5px !important; font-weight:500 !important; text-decoration:none !important; transition:all 0.2s ease !important; margin: 2px 8px !important; font-family: 'Inter', sans-serif !important; box-sizing: border-box !important; background: transparent !important; border-left: 3px solid transparent !important; box-shadow: none !important; }
+  .nav-item:hover { background:rgba(255,255,255,0.06) !important; color:#F8FAFC !important; }
+  .nav-item.active { background:rgba(255,255,255,0.1) !important; color:#F8FAFC !important; font-weight:600 !important; border-left: 3px solid #C39A48 !important; border-radius: 4px 10px 10px 4px !important; box-shadow: none !important; }
+  .nav-item i { width: 16px !important; text-align: center !important; font-size: 14px !important; opacity: 0.8 !important; transition:0.2s !important; color: inherit !important; }
+  .nav-item:hover i { opacity: 1 !important; color: #fff !important; }
+  .nav-item.active i { opacity: 1 !important; color: #E8CE8A !important; }
+  .sidebar-nav::-webkit-scrollbar { width: 4px; }
+  .sidebar-nav::-webkit-scrollbar-track { background: transparent; }
+  .sidebar-nav::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+  .sidebar-section-label { font-size:10px !important; font-weight:700 !important; text-transform:uppercase !important; letter-spacing:0.15em !important; color:#64748B !important; padding:20px 24px 8px !important; font-family: 'Inter', sans-serif !important; }
+</style>
+</head>
+<body class="bg-[#F1F5F9]">
+<div class="flex min-h-screen">
+
+  <!-- SIDEBAR -->
+  <aside class="fixed left-0 top-0 bottom-0 w-60 flex flex-col z-40 overflow-hidden" style="background:#0F172A;">
+
+    <div style="display: flex; align-items: center; gap: 12px; padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+      <div style="width: 36px; height: 36px; background: linear-gradient(135deg,#f2d480,#c39a48); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; color: #0F172A; flex-shrink: 0;">🎓</div>
+      <div>
+        <div style="color: #fff; font-weight: 700; font-size: 16px; font-family: 'Inter', sans-serif; line-height: 1.2;">EduFlow</div>
+        <div style="color: #C39A48; font-weight: 700; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 2px;">School Navigator</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav" style="flex: 1; overflow-y: auto; padding: 12px 0;">
+      <div class="sidebar-section-label">Main</div>
+      <a href="dashboard.html" class="nav-item"><i class="fa-solid fa-house"></i> Dashboard</a>
+      <a href="students.html" class="nav-item"><i class="fa-solid fa-users"></i> Students</a>
+      <a href="teachers.html" class="nav-item"><i class="fa-solid fa-chalkboard-user"></i> Teachers</a>
+      <a href="parents.html" class="nav-item"><i class="fa-solid fa-people-roof"></i> Parents</a>
+      <a href="classes.html" class="nav-item"><i class="fa-solid fa-school"></i> Classes</a>
+      <a href="subjects.html" class="nav-item"><i class="fa-solid fa-book"></i> Subjects</a>
+      <div class="sidebar-section-label">Academics</div>
+      <a href="attendance.html" class="nav-item"><i class="fa-solid fa-calendar-check"></i> Attendance</a>
+      <a href="grades.html" class="nav-item"><i class="fa-solid fa-chart-line"></i> Grades</a>
+      <a href="exams.html" class="nav-item"><i class="fa-solid fa-file-signature"></i> Exams</a>
+      <a href="timetable.html" class="nav-item"><i class="fa-solid fa-clock"></i> Timetable</a>
+      <a href="academic-year.html" class="nav-item"><i class="fa-solid fa-calendar-days"></i> Academic Year</a>
+      <div class="sidebar-section-label">System</div>
+      <a href="announcements.html" class="nav-item"><i class="fa-solid fa-bullhorn"></i> Announcements</a>
+      <a href="reports.html" class="nav-item"><i class="fa-solid fa-chart-pie"></i> Reports</a>
+      <a href="notifications.html" class="nav-item"><i class="fa-regular fa-bell"></i> Notifications</a>
+      <a href="audit-logs.html" class="nav-item"><i class="fa-solid fa-shield-halved"></i> Audit Logs</a>
+      <a href="settings.html" class="nav-item"><i class="fa-solid fa-gear"></i> Settings</a>
+    </nav>
+    <div style="padding: 16px; border-top: 1px solid rgba(255,255,255,0.05); background: rgba(0,0,0,0.15);">
+      <button id="logout-btn" style="display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 10px; border-radius: 8px; background: transparent !important; border: none !important; color: #94A3B8 !important; font-size: 13.5px; font-weight: 600; cursor: pointer; transition: 0.2s;" onmouseover="this.style.color='#fff'; this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.color='#94A3B8'; this.style.background='transparent'"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</button>
+    </div>
+</aside>
+
+  <!-- MAIN -->
+  <div class="flex-1 ml-60 flex flex-col min-h-screen">
+
+    <!-- Header -->
+    <header class="bg-white border-b border-[#E2E8F0] h-14 flex items-center px-6 gap-4 sticky top-0 z-30">
+      <div class="flex-1 max-w-sm flex items-center bg-[#F1F5F9] border border-[#E2E8F0] rounded-lg px-3 py-1.5 gap-2 text-[#94A3B8] text-sm">
+        🔍 <input placeholder="Quick search students…" type="text" id="search-input" class="bg-transparent border-none outline-none flex-1 text-[#0F172A] text-sm">
+      </div>
+      <div class="ml-auto flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-[#E2E8F0] cursor-pointer text-sm font-medium text-[#0F172A]">
+        <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white" style="background:linear-gradient(135deg,#C39A48,#E8CE8A);">A</div>
+        <span>Admin</span>
       </div>
     </header>
 
-    <div class="page-body">
-<div id="CONTENT_PLACEHOLDER">
-  <header class="flex items-center justify-between mb-6">
-    <h2 class="text-2xl font-semibold text-white">Student Management</h2>
-    <div class="flex gap-2">
-      <button id="btn-add-student" class="btn-primary flex items-center gap-2"><svg class="w-5 h-5"><use href="#heroicon-outline-plus-circle"></use></svg> Add Student</button>
-      <button id="btn-import-students" class="btn-outline flex items-center gap-2"><svg class="w-5 h-5"><use href="#heroicon-outline-arrow-up-tray"></use></svg> Import CSV/Excel</button>
-    </div>
-  </header>
+    <!-- Page body -->
+    <div class="flex-1 p-7">
 
-  <!-- Filters -->
-  <section class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-    <input type="text" id="search-students" placeholder="Search students…" class="input-base">
-    <select id="filter-grade" class="select-base"><option value="">All Grades</option></select>
-    <select id="filter-status" class="select-base"><option value="">All Statuses</option><option value="Active">Active</option><option value="Inactive">Inactive</option></select>
-  </section>
+      <!-- Title row -->
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <h1 class="text-[22px] font-bold text-[#0F172A]">Student Management</h1>
+          <p class="text-sm text-[#94A3B8] mt-0.5">Manage student profiles and enrollment</p>
+        </div>
+        <div class="flex gap-2 flex-wrap">
+          <button class="btn btn-primary" onclick="openModal()">+ Add Student</button>
+          <button class="btn btn-outline" onclick="openImportModal()">📥 Import</button>
+          <button class="btn btn-outline" onclick="exportStudents()">📤 Export</button>
+        </div>
+      </div>
 
-  <!-- Table -->
-  <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm overflow-x-auto">
-    <table class="w-full table-auto text-left">
-      <thead class="bg-gray-100 dark:bg-gray-700">
-        <tr>
-          <th class="p-2 font-medium">Student</th>
-          <th class="p-2 font-medium">ID</th>
-          <th class="p-2 font-medium">Class</th>
-          <th class="p-2 font-medium">Gender</th>
-          <th class="p-2 font-medium">Status</th>
-          <th class="p-2 font-medium">Actions</th>
-        </tr>
-      </thead>
-      <tbody id="students-tbody">
-        <tr class="animate-pulse"><td colspan="6" class="p-4 text-center text-gray-500 dark:text-gray-400">Loading…</td></tr>
-      </tbody>
-    </table>
-  </div>
+      <!-- Filters -->
+      <div class="flex gap-2.5 flex-wrap mb-4">
+        <input type="text" id="filter-search" placeholder="Search by name or ID…"
+          class="form-input" style="width:auto;flex:1;min-width:200px;">
+        <select id="filter-status" class="form-input" style="width:auto;min-width:130px;">
+          <option value="">All Status</option>
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+        </select>
+        <button class="btn btn-primary" onclick="applyFilters()">🔍 Search</button>
+      </div>
 
-  <div class="flex justify-end mt-4" id="students-pagination"></div>
+      <!-- Table -->
+      <div class="bg-white rounded-xl border border-[#E2E8F0] overflow-hidden shadow-sm">
+        <div class="overflow-x-auto">
+          <table>
+            <thead>
+              <tr>
+                <th>Student</th><th>ID</th><th>Class</th><th>Gender</th><th>Status</th><th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="students-tbody">
+              <tr><td colspan="6" class="text-center py-10 text-[#94A3B8]">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
 
-  <!-- Add/Edit Modal -->
-  <div class="modal-overlay hidden" id="student-modal">
-    <div class="modal w-full max-w-2xl">
-      <h2 class="text-xl font-semibold mb-4" id="student-modal-title">Add Student</h2>
-      <form id="student-form">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div class="form-group"><label class="form-label">First Name</label><input class="form-input" name="first_name" required></div>
-          <div class="form-group"><label class="form-label">Last Name</label><input class="form-input" name="last_name" required></div>
-          <div class="form-group"><label class="form-label">Gender</label><select class="form-select" name="gender" required><option>Male</option><option>Female</option><option>Other</option></select></div>
-          <div class="form-group"><label class="form-label">Date of Birth</label><input type="date" class="form-input" name="dob" required></div>
-          <div class="form-group"><label class="form-label">Photo</label><input type="file" accept="image/*" class="form-input" name="photo"></div>
-          <div class="form-group"><label class="form-label">Status</label><select class="form-select" name="status" required><option>Active</option><option>Inactive</option></select></div>
-        </div>
-        <hr class="my-4">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div class="form-group"><label class="form-label">Grade</label><select class="form-select" name="grade" required></select></div>
-          <div class="form-group"><label class="form-label">Section</label><input class="form-input" name="section" required></div>
-          <div class="form-group"><label class="form-label">Academic Year</label><input class="form-input" name="year" placeholder="2023/2024" required></div>
-        </div>
-        <hr class="my-4">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div class="form-group"><label class="form-label">Parent Name</label><input class="form-input" name="parent_name" required></div>
-          <div class="form-group"><label class="form-label">Parent Phone</label><input type="tel" class="form-input" name="parent_phone" required></div>
-          <div class="form-group"><label class="form-label">Parent Email</label><input type="email" class="form-input" name="parent_email" required></div>
-        </div>
-        <hr class="my-4">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div class="form-group"><label class="form-label">Username</label><input class="form-input" name="username" required></div>
-          <div class="form-group"><label class="form-label">Password</label><input type="password" class="form-input" name="password" required></div>
-        </div>
-        <div class="flex justify-end gap-3 mt-6">
-          <button type="button" class="btn-outline" onclick="closeModal('student-modal')">Cancel</button>
-          <button type="submit" class="btn-primary">Save</button>
-        </div>
-      </form>
+      <div class="flex justify-end mt-4 gap-1" id="students-pagination"></div>
     </div>
   </div>
+</div>
 
-  <!-- Import Modal -->
-  <div class="modal-overlay hidden" id="import-modal">
-    <div class="modal w-full max-w-md">
-      <h2 class="text-xl font-semibold mb-4">Import Students</h2>
-      <form id="import-form" class="space-y-4">
-        <div><label class="form-label">Select CSV / Excel</label><input type="file" accept=".xlsx,.xls,.csv" class="form-input" name="excel" required></div>
-        <div class="flex justify-end gap-2">
-          <button type="button" class="btn-outline" onclick="closeModal('import-modal')">Cancel</button>
-          <button type="submit" class="btn-primary">Upload</button>
+<!-- ===== ADD / EDIT MODAL ===== -->
+<div class="modal-overlay" id="student-modal">
+  <div class="bg-white rounded-2xl p-8 w-full shadow-2xl" style="max-width:620px;">
+    <h2 class="text-lg font-bold text-[#0F172A] mb-5" id="student-modal-title">Add Student</h2>
+    <div id="modal-alert" class="alert-error" style="display:none;"></div>
+    <form id="student-form">
+      <div class="grid grid-cols-2 gap-3 mb-3">
+        <div><label class="form-label">First Name</label><input class="form-input" id="s-first" required placeholder="John"></div>
+        <div><label class="form-label">Last Name</label><input class="form-input" id="s-last" required placeholder="Doe"></div>
+      </div>
+      <div class="grid grid-cols-2 gap-3 mb-3">
+        <div>
+          <label class="form-label">Gender</label>
+          <select class="form-input" id="s-gender"><option>Male</option><option>Female</option><option>Other</option></select>
         </div>
-        <div id="import-alert" class="alert alert-error hidden"></div>
-      </form>
+        <div><label class="form-label">Date of Birth</label><input type="date" class="form-input" id="s-dob"></div>
+      </div>
+      <div class="grid grid-cols-2 gap-3 mb-3">
+        <div><label class="form-label">Grade</label><input class="form-input" id="s-grade" placeholder="Grade 9"></div>
+        <div><label class="form-label">Section</label><input class="form-input" id="s-section" placeholder="A"></div>
+      </div>
+      <div class="grid grid-cols-2 gap-3 mb-3">
+        <div><label class="form-label">Login Email</label><input type="email" class="form-input" id="s-email" placeholder="Auto-generated"></div>
+        <div><label class="form-label">Password</label><input class="form-input" id="s-password" placeholder="Auto-generated"></div>
+      </div>
+      <div class="flex justify-end gap-2.5 mt-6">
+        <button type="button" class="btn btn-outline" onclick="closeModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary" id="save-btn">Save Student</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ===== IMPORT MODAL ===== -->
+<div class="modal-overlay" id="import-modal">
+  <div class="bg-white rounded-2xl p-8 w-full shadow-2xl" style="max-width:480px;">
+    <h2 class="text-lg font-bold text-[#0F172A] mb-5">Import Students</h2>
+    <div id="import-alert" class="alert-error" style="display:none;"></div>
+    <form id="import-form">
+      <div class="mb-3"><label class="form-label">CSV File</label><input type="file" accept=".csv" class="form-input" id="import-file" required></div>
+      <p class="text-xs text-[#94A3B8] mb-4">Columns: first_name, last_name, gender, grade, section</p>
+      <div class="flex justify-end gap-2.5">
+        <button type="button" class="btn btn-outline" onclick="closeImportModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary">Upload</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ===== CONFIRM MODAL ===== -->
+<div class="modal-overlay" id="confirm-modal" style="z-index:300;">
+  <div class="bg-white rounded-2xl p-8 w-full shadow-2xl text-center" style="max-width:400px;">
+    <div class="text-4xl mb-4">⚠️</div>
+    <h2 class="text-lg font-bold text-[#0F172A] mb-2" id="confirm-title">Are you sure?</h2>
+    <p class="text-[#6b7280] mb-6" id="confirm-msg">This action cannot be undone.</p>
+    <div class="flex gap-3">
+      <button class="btn btn-outline flex-1" onclick="closeConfirm()">Cancel</button>
+      <button class="btn flex-1" id="confirm-btn" style="background:#EF4444;color:#fff;">Confirm</button>
     </div>
   </div>
 </div>
 
 <script>
+  /* ── Auth ── */
   const token = localStorage.getItem('access_token');
   if (!token) window.location.href = '../../login.html';
-  const { toast, openModal, closeModal } = window.App;
 
-  // Load students
-  async function loadStudents(page = 1, query = '') {
-    const tbody = document.getElementById('students-tbody');
-    tbody.innerHTML = `<tr class="animate-pulse"><td colspan="6" class="p-4 text-center text-gray-500 dark:text-gray-400">Loading…</td></tr>`;
+  /* ── Confirm ── */
+  let confirmCb = null;
+  function openConfirm(title, msg, cb) {
+    document.getElementById('confirm-title').textContent = title;
+    document.getElementById('confirm-msg').textContent = msg;
+    confirmCb = cb;
+    document.getElementById('confirm-modal').classList.add('open');
+  }
+  function closeConfirm() { document.getElementById('confirm-modal').classList.remove('open'); }
+  document.getElementById('confirm-btn').onclick = () => { if (confirmCb) confirmCb(); closeConfirm(); };
+
+  /* ── Logout ── */
+  document.getElementById('logout-btn').onclick = () =>
+    openConfirm('Log Out', 'Are you sure you want to log out?', () => {
+      localStorage.removeItem('access_token');
+      window.location.href = '../../login.html';
+    });
+
+  /* ── Quick search in header ── */
+  document.getElementById('search-input').addEventListener('input', e => {
+    const q = e.target.value.toLowerCase();
+    renderStudents(allStudents.filter(s =>
+      (s.name||'').toLowerCase().includes(q) || (s.student_id||'').toLowerCase().includes(q)
+    ));
+  });
+
+  /* ── Data ── */
+  let allStudents = [], editingId = null;
+
+  const COLORS = ['#0F172A','#C39A48','#334155','#1E40AF','#065F46','#7C3AED'];
+  function initials(name) {
+    return (name||'??').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  }
+
+  async function loadStudents() {
+    const tb = document.getElementById('students-tbody');
+    tb.innerHTML = `<tr><td colspan="6" class="text-center py-10 text-[#94A3B8]"><span class="skeleton" style="width:280px;height:18px;"></span></td></tr>`;
     try {
-      const res = await fetch(`/api/admin/students?page=${page}&search=${encodeURIComponent(query)}`,{ headers:{ Authorization:'Bearer '+token } });
+      const res = await fetch('/api/admin/students', { headers: { Authorization: 'Bearer ' + token } });
       const data = await res.json();
-      const list = data.students || data;
-      if (!list.length) {
-        tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center">No students found.</td></tr>`;
-        return;
-      }
-      tbody.innerHTML = list.map(s => `
-        <tr class="hover:bg-gray-100 dark:hover:bg-gray-700 transition">
-          <td class="p-2 flex items-center gap-2">
-            <div class="w-8 h-8 rounded-full bg-${s.gender==='Male'?'blue':'pink'}-500 flex items-center justify-center text-white text-xs">${s.first_name[0]}${s.last_name[0]}</div>
-            ${s.first_name} ${s.last_name}
-          </td>
-          <td class="p-2">${s.student_id}</td>
-          <td class="p-2">${s.class_name||'—'}</td>
-          <td class="p-2">${s.gender}</td>
-          <td class="p-2"><span class="badge ${s.status==='Active'?'bg-success':'bg-gray-400'}">${s.status}</span></td>
-          <td class="p-2 space-x-1">
-            <button class="btn-sm btn-outline" onclick="editStudent(${s.id})">Edit</button>
-            <button class="btn-sm btn-outline text-danger" onclick="deleteStudent(${s.id})">Delete</button>
-          </td>
-        </tr>`).join('');
-      renderPagination(data.totalPages||1, page);
-    } catch (e) {
-      tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-red-600">Failed to load.</td></tr>`;
+      allStudents = data.students || data || [];
+      renderStudents(allStudents);
+    } catch {
+      tb.innerHTML = `<tr><td colspan="6" class="text-center py-10 text-red-500">❌ Could not load students.</td></tr>`;
     }
   }
 
-  function renderPagination(total, current) {
-    const container = document.getElementById('students-pagination');
-    container.innerHTML = '';
-    for (let i=1;i<=total;i++) {
-      const btn = document.createElement('button');
-      btn.textContent = i;
-      btn.className = i===current ? 'btn-primary' : 'btn-outline';
-      btn.onclick = () => loadStudents(i, document.getElementById('search-students').value);
-      container.appendChild(btn);
+  function renderStudents(list) {
+    const tb = document.getElementById('students-tbody');
+    if (!list.length) {
+      tb.innerHTML = `<tr><td colspan="6" class="text-center py-12 text-[#94A3B8]">No students found.</td></tr>`;
+      return;
     }
+    tb.innerHTML = list.map((s, i) => {
+      const c = COLORS[i % COLORS.length];
+      const ini = initials(s.name);
+      return `
+      <tr>
+        <td>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="width:36px;height:36px;border-radius:50%;background:${c};display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:13px;flex-shrink:0;">${ini}</div>
+            <span style="font-weight:600;color:#0F172A;">${s.name || '—'}</span>
+          </div>
+        </td>
+        <td style="font-family:monospace;color:#64748B;">${s.student_id || '—'}</td>
+        <td>${s.class_id || '—'}</td>
+        <td>${s.gender || '—'}</td>
+        <td><span class="badge badge-green">Active</span></td>
+        <td>
+          <button class="btn btn-outline btn-sm" onclick="openEdit(${s.id})">✏️ Edit</button>
+          <button class="btn btn-sm" style="background:#FEE2E2;color:#DC2626;border:1px solid #FECACA;margin-left:4px;" onclick="delStudent(${s.id})">🗑️ Delete</button>
+        </td>
+      </tr>`;
+    }).join('');
   }
 
-  document.getElementById('search-students').addEventListener('input', e => loadStudents(1, e.target.value));
+  /* ── Filters ── */
+  function applyFilters() {
+    const q = document.getElementById('filter-search').value.toLowerCase();
+    const status = document.getElementById('filter-status').value;
+    const filtered = allStudents.filter(s =>
+      (!q || (s.name||'').toLowerCase().includes(q) || (s.student_id||'').toLowerCase().includes(q))
+    );
+    renderStudents(filtered);
+  }
 
-  // Add / Edit logic
-  let editId = null;
-  window.openStudentModal = () => { editId = null; document.getElementById('student-modal-title').textContent='Add Student'; document.getElementById('student-form').reset(); openModal('student-modal'); };
-  window.editStudent = async (id) => {
-    editId = id;
-    document.getElementById('student-modal-title').textContent='Edit Student';
-    const res = await fetch(`/api/admin/students/${id}`,{ headers:{ Authorization:'Bearer '+token } });
-    const s = await res.json();
-    const f = document.getElementById('student-form');
-    f.first_name.value = s.first_name; f.last_name.value=s.last_name; f.gender.value=s.gender; f.dob.value=s.dob?.split('T')[0]; f.status.value=s.status; f.grade.value=s.grade; f.section.value=s.section; f.year.value=s.year; f.parent_name.value=s.parent_name; f.parent_phone.value=s.parent_phone; f.parent_email.value=s.parent_email; f.username.value=s.username; // password left blank intentionally
-    openModal('student-modal');
-  };
-  document.getElementById('student-form').addEventListener('submit', async e => {
+  /* ── Modal open/close ── */
+  function openModal() {
+    editingId = null;
+    document.getElementById('student-modal-title').textContent = 'Add Student';
+    document.getElementById('student-form').reset();
+    document.getElementById('modal-alert').style.display = 'none';
+    document.getElementById('save-btn').textContent = 'Save Student';
+    document.getElementById('student-modal').classList.add('open');
+  }
+  function openEdit(id) {
+    const s = allStudents.find(x => x.id === id);
+    if (!s) return;
+    editingId = id;
+    document.getElementById('student-modal-title').textContent = 'Edit Student';
+    document.getElementById('modal-alert').style.display = 'none';
+    document.getElementById('s-first').value = (s.name||'').split(' ')[0];
+    document.getElementById('s-last').value = (s.name||'').split(' ').slice(1).join(' ');
+    document.getElementById('s-gender').value = s.gender || 'Male';
+    document.getElementById('s-dob').value = s.dob || '';
+    document.getElementById('s-grade').value = s.grade || '';
+    document.getElementById('s-section').value = s.section || '';
+    document.getElementById('s-email').value = s.email || '';
+    document.getElementById('save-btn').textContent = 'Update Student';
+    document.getElementById('student-modal').classList.add('open');
+  }
+  function closeModal() { document.getElementById('student-modal').classList.remove('open'); }
+  function openImportModal() { document.getElementById('import-modal').classList.add('open'); }
+  function closeImportModal() { document.getElementById('import-modal').classList.remove('open'); }
+
+  /* ── Save ── */
+  document.getElementById('student-form').onsubmit = async (e) => {
     e.preventDefault();
-    const fd = new FormData(e.target);
-    const method = editId ? 'PUT' : 'POST';
-    const url = editId ? `/api/admin/students/${editId}` : '/api/admin/students';
+    const btn = document.getElementById('save-btn');
+    btn.disabled = true; btn.textContent = 'Saving…';
     try {
-      const res = await fetch(url,{ method, headers:{ Authorization:'Bearer '+token }, body:fd });
-      if (!res.ok) throw new Error(await res.text());
-      toast('Student saved','success');
-      closeModal('student-modal');
-      loadStudents();
-    } catch (err) { toast('Save failed','error'); }
-  });
-
-  // Delete
-  window.deleteStudent = async (id) => {
-    if (!confirm('Delete this student?')) return;
-    try {
-      const res = await fetch(`/api/admin/students/${id}`,{ method:'DELETE', headers:{ Authorization:'Bearer '+token } });
-      if (!res.ok) throw new Error(await res.text());
-      toast('Student deleted','success');
-      loadStudents();
-    } catch (e) { toast('Delete failed','error'); }
+      const fn = document.getElementById('s-first').value.trim();
+      const ln = document.getElementById('s-last').value.trim();
+      const body = {
+        name: fn + (ln ? ' ' + ln : ''),
+        gender: document.getElementById('s-gender').value,
+        date_of_birth: document.getElementById('s-dob').value || '2010-01-01',
+        grade: document.getElementById('s-grade').value,
+        section: document.getElementById('s-section').value,
+        parent_name: 'Parent',
+        class_id: 1
+      };
+      const url = editingId ? `/api/admin/students/${editingId}` : '/api/admin/students';
+      const res = await fetch(url, {
+        method: editingId ? 'PUT' : 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+        body: JSON.stringify(body)
+      });
+      if (!res.ok) throw new Error((await res.json()).error || 'Error saving');
+      closeModal(); loadStudents();
+    } catch (err) {
+      const a = document.getElementById('modal-alert');
+      a.textContent = err.message; a.style.display = 'block';
+    }
+    btn.disabled = false; btn.textContent = editingId ? 'Update Student' : 'Save Student';
   };
 
-  // Import
-  window.openImportModal = () => openModal('import-modal');
-  document.getElementById('import-form').addEventListener('submit', async e => {
-    e.preventDefault();
-    const fd = new FormData(e.target);
-    try {
-      const res = await fetch('/admin/bulk-import/students',{ method:'POST', headers:{ Authorization:'Bearer '+token }, body:fd });
-      const data = await res.json();
-      if (res.ok) { toast(`✅ Created ${data.created_students} students`,'success'); closeModal('import-modal'); loadStudents(); }
-      else { const a=document.getElementById('import-alert'); a.textContent=data.error||'Upload failed'; a.classList.remove('hidden'); }
-    } catch (err) { const a=document.getElementById('import-alert'); a.textContent='Network error'; a.classList.remove('hidden'); }
-  });
+  /* ── Delete ── */
+  function delStudent(id) {
+    openConfirm('Delete Student', 'This will permanently remove this student record.', async () => {
+      await fetch('/api/admin/students/' + id, { method: 'DELETE', headers: { Authorization: 'Bearer ' + token } });
+      loadStudents();
+    });
+  }
 
-  // Init
+  /* ── Export ── */
+  function exportStudents() {
+    const rows = [['Name','ID','Gender'], ...allStudents.map(s => [s.name, s.student_id, s.gender])];
+    const blob = new Blob([rows.map(r => r.join(',')).join('\n')], { type: 'text/csv' });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'students.csv'; a.click();
+  }
+
+  /* ── Import ── */
+  document.getElementById('import-form').onsubmit = async (e) => {
+    e.preventDefault();
+    const file = document.getElementById('import-file').files[0];
+    if (!file) return;
+    const text = await file.text();
+    const rows = text.split('\n').map(r => r.split(','));
+    let created = 0;
+    for (let i = 1; i < rows.length; i++) {
+      const row = rows[i]; if (row.length < 2) continue;
+      try {
+        await fetch('/api/admin/students', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+          body: JSON.stringify({ name: row[0], gender: row[1]||'Male', parent_name: 'Parent', class_id: 1 })
+        });
+        created++;
+      } catch {}
+    }
+    alert(`✅ Imported ${created} students`);
+    closeImportModal(); loadStudents();
+  };
+
   loadStudents();
-  document.getElementById('btn-add-student').addEventListener('click', openStudentModal);
-  document.getElementById('btn-import-students').addEventListener('click', openImportModal);
 </script>
 
-    </div>
-  </div>
-</div>
 <script>
   document.addEventListener('DOMContentLoaded', () => {
-    const page = location.pathname.split('/').pop();
+    const page = location.pathname.split('/').pop().replace('.html', '');
     document.querySelectorAll('.nav-item').forEach(link => {
-      if (link.getAttribute('href') === page) link.classList.add('active');
+      if (link.getAttribute('href') === page + '.html' || link.getAttribute('href') === page) {
+        link.classList.add('active');
+      } else {
+        link.classList.remove('active');
+      }
     });
   });
 </script>

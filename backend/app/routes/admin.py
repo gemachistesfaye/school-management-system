@@ -1,10 +1,12 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, send_file
 from ..middleware.auth import rbac
-from ..models import db, Student, Profile, Role, School, Class, User, Course, Teacher
+from ..models import db, Student, Profile, Role, School, Class, User, Course, Teacher, Attendance, Grade, Fee, Exam
 from ..utils.security import hash_password
 import pandas as pd
+import io
+import csv
 import time
-from datetime import datetime
+from datetime import datetime, date
 bp = Blueprint('admin', __name__)
 
 @bp.post('/bulk-import/teachers')
@@ -224,22 +226,357 @@ def dashboard():
 @bp.get('/school-metrics')
 @rbac(80)
 def school_metrics():
-    # Placeholder data for Admin dashboard
-    return jsonify({
-        "students": 450,
-        "teachers": 32,
-        "fees_collected": "12,400.00"
-    })
+    """
+    Dashboard Metrics
+    ---
+    tags:
+      - Dashboard
+    summary: Get school statistics and aggregated metrics
+    security:
+      - Bearer: []
+    responses:
+      200:
+        description: Dashboard metrics including student count, attendance rate, etc.
+    """
+    try:
+        students_count = Student.query.count()
+        teachers_count = Teacher.query.count()
+        classes_count = Class.query.count()
+        
+        # Count unique parents via profiles with parent role
+        parent_role = Role.query.filter_by(name='parent').first()
+        parents_count = Profile.query.filter_by(parent_id=None).count() if parent_role else 0
+        
+        # Attendance rate (last 30 days)
+        today = date.today()
+        thirty_days_ago = date(today.year, today.month - 1, today.day) if today.month > 1 else date(today.year - 1, 12, today.day)
+        total_attendance = Attendance.query.filter(Attendance.date >= thirty_days_ago).count()
+        present_attendance = Attendance.query.filter(Attendance.date >= thirty_days_ago, Attendance.status == 'Present').count()
+        attendance_rate = round((present_attendance / total_attendance * 100), 1) if total_attendance > 0 else 0
+        
+        # Fee collection
+        total_fees = db.session.query(db.func.sum(Fee.amount)).scalar() or 0
+        paid_fees = db.session.query(db.func.sum(Fee.paid_amount)).scalar() or 0
+        
+        # Subjects count
+        subjects_count = Course.query.count()
+        
+        return jsonify({
+            "students": students_count,
+            "teachers": teachers_count,
+            "classes": classes_count,
+            "parents": parents_count,
+            "attendance_rate": f"{attendance_rate}%",
+            "subjects": subjects_count,
+            "fees_collected": f"{paid_fees:,.2f}",
+            "total_fees": f"{total_fees:,.2f}"
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@bp.get('/reports/<string:report_type>')
+@rbac(80)
+def generate_report(report_type):
+    """Generate CSV reports for various data types."""
+    try:
+        output = io.StringIO()
+        writer = csv.writer(output)
+        
+        if report_type == 'students':
+            writer.writerow(['Student ID', 'Name', 'Gender', 'DOB', 'Class', 'Phone', 'Enrollment Date'])
+            students = Student.query.all()
+            for s in students:
+                writer.writerow([s.student_id, s.name, s.gender, s.date_of_birth, 
+                               s.class_.class_name if s.class_ else '', s.phone, s.enrollment_date])
+            filename = 'students-report.csv'
+            
+        elif report_type == 'attendance':
+            writer.writerow(['Student ID', 'Student Name', 'Date', 'Status'])
+            records = Attendance.query.all()
+            for r in records:
+                writer.writerow([r.student.student_id if r.student else '', 
+                               r.student.name if r.student else '', r.date, r.status])
+            filename = 'attendance-report.csv'
+            
+        elif report_type == 'teachers':
+            writer.writerow(['Name', 'Subject', 'Email', 'Phone', 'Hire Date'])
+            teachers = Teacher.query.all()
+            for t in teachers:
+                writer.writerow([t.name, t.subject, t.email, t.phone, t.hire_date])
+            filename = 'teachers-report.csv'
+            
+        elif report_type == 'classes':
+            writer.writerow(['Class Name', 'Section', 'Academic Year', 'Students'])
+            classes = Class.query.all()
+            for c in classes:
+                count = Student.query.filter_by(class_id=c.id).count()
+                writer.writerow([c.class_name, c.section, c.academic_year, count])
+            filename = 'classes-report.csv'
+            
+        elif report_type == 'academic':
+            writer.writerow(['Student ID', 'Student Name', 'Subject', 'Exam Type', 'Score', 'Total'])
+            grades = Grade.query.all()
+            for g in grades:
+                writer.writerow([g.student.student_id if g.student else '',
+                               g.student.name if g.student else '', 
+                               g.subject if hasattr(g, 'subject') else 'N/A',
+                               g.exam_type, g.score, g.total_marks])
+            filename = 'academic-report.csv'
+            
+        elif report_type == 'financial':
+            writer.writerow(['Student ID', 'Student Name', 'Amount', 'Paid', 'Status', 'Due Date'])
+            fees = Fee.query.all()
+            for f in fees:
+                writer.writerow([f.student.student_id if f.student else '',
+                               f.student.name if f.student else '',
+                               f.amount, f.paid_amount, f.status, f.due_date])
+            filename = 'financial-report.csv'
+            
+        else:
+            return jsonify({"error": "Invalid report type"}), 400
+        
+        output.seek(0)
+        return send_file(
+            io.BytesIO(output.getvalue().encode('utf-8-sig')),
+            mimetype='text/csv',
+            as_attachment=True,
+            download_name=filename
+        )
+    except Exception as e:
+        return jsonify({"error": f"Report generation failed: {str(e)}"}), 500
+
+@bp.get('/parents')
+@rbac(80)
+def get_parents():
+    profiles = Profile.query.filter(
+        Profile.parent_id.is_(None)  # Parents are profiles without a parent
+    ).all()
+    res = []
+    for p in profiles:
+        children_count = Student.query.filter_by(parent_id=p.id).count()
+        res.append({
+            "id": p.id,
+            "name": p.full_name,
+            "email": p.user.email if p.user else '',
+            "children": children_count
+        })
+    return jsonify({"parents": res})
+
+@bp.get('/subjects')
+@rbac(80)
+def get_subjects():
+    """
+    List all subjects
+    ---
+    tags:
+      - Subjects
+    summary: Retrieve all courses/subjects
+    security:
+      - Bearer: []
+    responses:
+      200:
+        description: List of subjects
+    """
+    courses = Course.query.all()
+    res = []
+    for c in courses:
+        res.append({
+            "id": c.id,
+            "name": c.name,
+            "code": c.code,
+            "teacher": c.teacher.name if c.teacher else '',
+            "school_id": c.school_id
+        })
+    return jsonify({"subjects": res})
+
+@bp.post('/subjects')
+@rbac(80)
+def add_subject():
+    data = request.json
+    course = Course(
+        name=data.get('name'),
+        code=data.get('code'),
+        school_id=data.get('school_id', 1)
+    )
+    db.session.add(course)
+    db.session.commit()
+    return jsonify({"message": "Subject created"}), 201
+
+@bp.delete('/subjects/<int:id>')
+@rbac(80)
+def delete_subject(id):
+    c = Course.query.get(id)
+    if c:
+        db.session.delete(c)
+        db.session.commit()
+    return jsonify({"message": "Deleted"}), 200
+
+@bp.get('/exams')
+@rbac(80)
+def get_exams():
+    exams = Exam.query.all()
+    res = []
+    for e in exams:
+        res.append({
+            "id": e.id,
+            "name": e.exam_name,
+            "date": str(e.exam_date),
+            "year": e.academic_year
+        })
+    return jsonify({"exams": res})
+
+@bp.post('/exams')
+@rbac(80)
+def add_exam():
+    data = request.json
+    exam = Exam(
+        exam_name=data.get('name'),
+        exam_date=datetime.strptime(data.get('date'), '%Y-%m-%d').date(),
+        academic_year=data.get('year', f'{datetime.utcnow().year}/{datetime.utcnow().year+1}')
+    )
+    db.session.add(exam)
+    db.session.commit()
+    return jsonify({"message": "Exam created"}), 201
+
+@bp.delete('/exams/<int:id>')
+@rbac(80)
+def delete_exam(id):
+    e = Exam.query.get(id)
+    if e:
+        db.session.delete(e)
+        db.session.commit()
+    return jsonify({"message": "Deleted"}), 200
+
+@bp.get('/attendance')
+@rbac(80)
+def get_attendance():
+    """
+    Get Attendance
+    ---
+    tags:
+      - Attendance
+    summary: Retrieve daily attendance records
+    security:
+      - Bearer: []
+    parameters:
+      - in: query
+        name: date
+        type: string
+        description: Date in YYYY-MM-DD format (defaults to today)
+        required: false
+    responses:
+      200:
+        description: List of attendance records
+    """
+    date_str = request.args.get('date')
+    query_date = datetime.strptime(date_str, '%Y-%m-%d').date() if date_str else date.today()
+    records = Attendance.query.filter_by(date=query_date).all()
+    res = []
+    for r in records:
+        res.append({
+            "id": r.id,
+            "student_id": r.student_id,
+            "student_name": r.student.name if r.student else '',
+            "date": str(r.date),
+            "status": r.status,
+            "class_name": r.student.class_.class_name if r.student and r.student.class_ else ''
+        })
+    return jsonify({"attendance": res})
+
+@bp.post('/attendance')
+@rbac(80)
+def mark_attendance():
+    data = request.json
+    records = data.get('records', [])
+    count = 0
+    for rec in records:
+        existing = Attendance.query.filter_by(
+            student_id=rec.get('student_id'),
+            date=datetime.strptime(rec.get('date'), '%Y-%m-%d').date()
+        ).first()
+        if existing:
+            existing.status = rec.get('status', 'Present')
+        else:
+            att = Attendance(
+                student_id=rec.get('student_id'),
+                date=datetime.strptime(rec.get('date'), '%Y-%m-%d').date(),
+                status=rec.get('status', 'Present')
+            )
+            db.session.add(att)
+        count += 1
+    db.session.commit()
+    return jsonify({"message": f"{count} attendance records saved"}), 200
+
+@bp.get('/grades')
+@rbac(80)
+def get_grades():
+    """
+    Get Grades
+    ---
+    tags:
+      - Grades
+    summary: Retrieve all student grades
+    security:
+      - Bearer: []
+    responses:
+      200:
+        description: List of grades
+    """
+    grades = Grade.query.all()
+    res = []
+    for g in grades:
+        res.append({
+            "id": g.id,
+            "student_id": g.student_id,
+            "student_name": g.student.name if g.student else '',
+            "subject": g.subject if hasattr(g, 'subject') else 'N/A',
+            "exam_type": g.exam_type,
+            "score": g.score,
+            "total_marks": g.total_marks
+        })
+    return jsonify({"grades": res})
 
 @bp.post('/cascade-register')
 @rbac(80)
 def cascade_register():
-    """Create a parent profile and a student linked to that parent.
-    Expected payload (mirrors frontend):
-    {
-        "student": {"email": "..., "name": "..."},
-        "parent": {"email": "..., "name": "..."}
-    }
+    """
+    Register new student with parent
+    ---
+    tags:
+      - Registration
+    summary: Create a student and parent profile at once
+    security:
+      - Bearer: []
+    parameters:
+      - in: body
+        name: body
+        required: true
+        schema:
+          type: object
+          properties:
+            student:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: Jane Doe
+                email:
+                  type: string
+                  example: jane@student.school.com
+            parent:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: John Doe
+                email:
+                  type: string
+                  example: john@parent.school.com
+    responses:
+      201:
+        description: Registration successful
+      400:
+        description: Invalid payload
     """
     data = request.json
     if not data or 'student' not in data or 'parent' not in data:
@@ -268,7 +605,7 @@ def cascade_register():
         # For now we just create Student record linking to parent_profile.id
         # Generate a simple student_id
         student_id = f"STU{int(datetime.utcnow().timestamp())}"  # unique-ish
-        student = Student(student_id=student_id, name=student_data['name'], gender='Other', date_of_birth='2000-01-01', class_id=1, parent_id=parent_profile.id)
+        student = Student(student_id=student_id, name=student_data['name'], gender='Other', date_of_birth=date(2000, 1, 1), class_id=1, parent_id=parent_profile.id)
         db.session.add(student)
         db.session.commit()
     except Exception as e:
@@ -279,6 +616,18 @@ def cascade_register():
 @bp.get('/students')
 @rbac(80)
 def get_students():
+    """
+    Get all students
+    ---
+    tags:
+      - Students
+    summary: List all enrolled students
+    security:
+      - Bearer: []
+    responses:
+      200:
+        description: List of students
+    """
     students = Student.query.all()
     res = []
     for s in students:
@@ -294,12 +643,54 @@ def get_students():
 @bp.post('/students')
 @rbac(80)
 def add_student():
+    """
+    Add a single student
+    ---
+    tags:
+      - Students
+    summary: Register a new student and parent profile
+    security:
+      - Bearer: []
+    parameters:
+      - in: body
+        name: body
+        required: true
+        schema:
+          type: object
+          properties:
+            name:
+              type: string
+              example: Timmy
+            parent_name:
+              type: string
+              example: Timmy's Dad
+            class_id:
+              type: integer
+              example: 1
+            gender:
+              type: string
+              example: Male
+            date_of_birth:
+              type: string
+              example: 2010-05-12
+    responses:
+      201:
+        description: Student created successfully
+    """
     data = request.json
     name = data.get('name')
     parent_name = data.get('parent_name')
     class_id = data.get('class_id')
     gender = data.get('gender')
-    dob = data.get('date_of_birth')
+    dob_str = data.get('date_of_birth')
+    dob = date(2010, 1, 1)  # safe default
+    if dob_str and isinstance(dob_str, str):
+        try:
+            dob = datetime.strptime(dob_str, '%Y-%m-%d').date()
+        except ValueError:
+            pass
+    elif isinstance(dob_str, date):
+        dob = dob_str
     
     if not all([name, parent_name, class_id]):
         return jsonify({"error": "Missing name, parent_name, or class"}), 400
@@ -485,6 +876,23 @@ def delete_teacher(id):
 @bp.delete('/students/<int:id>')
 @rbac(80)
 def delete_student(id):
+    """
+    Delete a student
+    ---
+    tags:
+      - Students
+    summary: Remove a student by ID
+    security:
+      - Bearer: []
+    parameters:
+      - in: path
+        name: id
+        type: integer
+        required: true
+    responses:
+      200:
+        description: Deleted successfully
+    """
     s = Student.query.get(id)
     if s:
         db.session.delete(s)
@@ -494,6 +902,31 @@ def delete_student(id):
 @bp.put('/students/<int:id>')
 @rbac(80)
 def edit_student(id):
+    """
+    Update a student
+    ---
+    tags:
+      - Students
+    summary: Modify a student by ID
+    security:
+      - Bearer: []
+    parameters:
+      - in: path
+        name: id
+        type: integer
+        required: true
+      - in: body
+        name: body
+        required: true
+        schema:
+          type: object
+          properties:
+            name:
+              type: string
+    responses:
+      200:
+        description: Student updated
+    """
     s = Student.query.get(id)
     if not s:
         return jsonify({"error": "Not found"}), 404
@@ -502,7 +935,15 @@ def edit_student(id):
     if 'phone' in data: s.phone = data['phone']
     if 'address' in data: s.address = data['address']
     if 'gender' in data: s.gender = data['gender']
-    if 'date_of_birth' in data: s.date_of_birth = data['date_of_birth']
+    if 'date_of_birth' in data:
+        dob_val = data['date_of_birth']
+        if isinstance(dob_val, str):
+            try:
+                s.date_of_birth = datetime.strptime(dob_val, '%Y-%m-%d').date()
+            except ValueError:
+                pass
+        elif isinstance(dob_val, date):
+            s.date_of_birth = dob_val
     if 'class_id' in data: s.class_id = data['class_id']
     try:
         db.session.commit()
@@ -545,3 +986,150 @@ def edit_class(id):
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
+
+# ── Parents CRUD ─────────────────────────────────────────────────────────
+
+@bp.post('/parents')
+@rbac(80)
+def add_parent():
+    data = request.json
+    name = data.get('name')
+    email = data.get('email')
+    phone = data.get('phone')
+    if not name:
+        return jsonify({"error": "Missing name"}), 400
+    try:
+        parent_role = Role.query.filter_by(name='parent').first()
+        if not parent_role:
+            parent_role = Role(name='parent', level=10)
+            db.session.add(parent_role)
+            db.session.flush()
+
+        p_email = email or f"{name.replace(' ','').lower()}_{int(time.time())}@school.com"
+        pwd = hash_password(f"{name.split()[0].lower()}2026")
+        user = User(email=p_email, password_hash=pwd, role_id=parent_role.id, must_change_password=True)
+        db.session.add(user)
+        db.session.flush()
+
+        profile = Profile(user_id=user.id, full_name=name, school_id=1)
+        db.session.add(profile)
+        db.session.commit()
+        return jsonify({"message": "Parent created successfully"}), 201
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
+
+@bp.put('/parents/<int:id>')
+@rbac(80)
+def edit_parent(id):
+    p = Profile.query.get(id)
+    if not p: return jsonify({"error": "Not found"}), 404
+    data = request.json
+    if 'name' in data: p.full_name = data['name']
+    if 'email' in data and p.user:
+        p.user.email = data['email']
+    try:
+        db.session.commit()
+        return jsonify({"message": "Parent updated"}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
+
+@bp.delete('/parents/<int:id>')
+@rbac(80)
+def delete_parent(id):
+    p = Profile.query.get(id)
+    if p:
+        db.session.delete(p)
+        db.session.commit()
+    return jsonify({"message": "Deleted"}), 200
+
+# ── Subjects Edit ────────────────────────────────────────────────────────
+
+@bp.put('/subjects/<int:id>')
+@rbac(80)
+def edit_subject(id):
+    c = Course.query.get(id)
+    if not c: return jsonify({"error": "Not found"}), 404
+    data = request.json
+    if 'name' in data: c.name = data['name']
+    if 'code' in data: c.code = data['code']
+    if 'teacher_id' in data: c.teacher_id = data['teacher_id']
+    try:
+        db.session.commit()
+        return jsonify({"message": "Subject updated"}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
+
+# ── Export CSV Endpoints ─────────────────────────────────────────────────
+
+@bp.get('/export/students')
+@rbac(80)
+def export_students():
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(['Student ID', 'Name', 'Gender', 'Date of Birth', 'Class', 'Phone', 'Parent'])
+    for s in Student.query.all():
+        writer.writerow([
+            s.student_id, s.name, s.gender,
+            str(s.date_of_birth) if s.date_of_birth else '',
+            s.class_.class_name if s.class_ else '',
+            s.phone or '',
+            s.parent.full_name if s.parent else ''
+        ])
+    output.seek(0)
+    return send_file(io.BytesIO(output.getvalue().encode('utf-8-sig')),
+                     mimetype='text/csv', as_attachment=True, download_name='students.csv')
+
+@bp.get('/export/teachers')
+@rbac(80)
+def export_teachers():
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(['Name', 'Email', 'Subject', 'Phone', 'Hire Date'])
+    for t in Teacher.query.all():
+        writer.writerow([t.name, t.email, t.subject, t.phone or '', str(t.hire_date) if t.hire_date else ''])
+    output.seek(0)
+    return send_file(io.BytesIO(output.getvalue().encode('utf-8-sig')),
+                     mimetype='text/csv', as_attachment=True, download_name='teachers.csv')
+
+@bp.get('/export/parents')
+@rbac(80)
+def export_parents():
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(['Name', 'Email', 'Children Count'])
+    profiles = Profile.query.filter(Profile.parent_id.is_(None)).all()
+    for p in profiles:
+        children = Student.query.filter_by(parent_id=p.id).count()
+        writer.writerow([p.full_name, p.user.email if p.user else '', children])
+    output.seek(0)
+    return send_file(io.BytesIO(output.getvalue().encode('utf-8-sig')),
+                     mimetype='text/csv', as_attachment=True, download_name='parents.csv')
+
+@bp.get('/export/classes')
+@rbac(80)
+def export_classes():
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(['Class Name', 'Section', 'Academic Year', 'Student Count'])
+    for c in Class.query.all():
+        count = Student.query.filter_by(class_id=c.id).count()
+        writer.writerow([c.class_name, c.section, c.academic_year, count])
+    output.seek(0)
+    return send_file(io.BytesIO(output.getvalue().encode('utf-8-sig')),
+                     mimetype='text/csv', as_attachment=True, download_name='classes.csv')
+
+@bp.get('/export/subjects')
+@rbac(80)
+def export_subjects():
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(['Name', 'Code', 'Teacher'])
+    for c in Course.query.all():
+        writer.writerow([c.name, c.code, c.teacher.name if c.teacher else ''])
+    output.seek(0)
+    return send_file(io.BytesIO(output.getvalue().encode('utf-8-sig')),
+                     mimetype='text/csv', as_attachment=True, download_name='subjects.csv')
+
